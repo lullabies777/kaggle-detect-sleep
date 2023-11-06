@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
-
+import sys
+sys.path.append('./')
 import hydra
 import torch
 from omegaconf import DictConfig

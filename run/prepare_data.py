@@ -6,7 +6,8 @@ import numpy as np
 import polars as pl
 from omegaconf import DictConfig
 from tqdm import tqdm
-
+import sys
+sys.path.append('./')
 from src.utils.common import trace
 
 SERIES_SCHEMA = {
