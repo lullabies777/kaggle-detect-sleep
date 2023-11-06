@@ -52,6 +52,8 @@ augmentation:
 post_process:
   score_th: 0.02
   distance: 10
+  gap: 180
+  quantile: 0.9
 
 # label
 labels:

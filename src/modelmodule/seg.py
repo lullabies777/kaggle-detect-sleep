@@ -12,7 +12,7 @@ from transformers import get_cosine_schedule_with_warmup
 from src.datamodule.seg import nearest_valid_size
 from src.models.common import get_model
 from src.utils.metrics import event_detection_ap
-from src.utils.post_process import post_process_for_seg
+from src.utils.post_process import post_process_for_seg, post_process_for_seg_v2
 
 
 class SegModel(LightningModule):
@@ -115,8 +115,20 @@ class SegModel(LightningModule):
             score_th=self.cfg.post_process.score_th,
             distance=self.cfg.post_process.distance,
         )
+        
+        val_pred_df2 = post_process_for_seg_v2(
+            keys=keys,
+            preds=preds[:, :, [1, 2]],
+            gap=self.cfg.post_process.gap,
+            quantile=self.cfg.post_process.quantile,
+        )
+                
         score = event_detection_ap(self.val_event_df.to_pandas(), val_pred_df.to_pandas())
         self.log("val_score", score, on_step=False, on_epoch=True, logger=True, prog_bar=True)
+        
+        score2 = event_detection_ap(self.val_event_df.to_pandas(), val_pred_df2.to_pandas())
+        self.log("val_score2", score2, on_step=False, on_epoch=True, logger=True, prog_bar=True)
+        
 
         if loss < self.__best_loss:
             np.save("keys.npy", np.array(keys))
