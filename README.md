@@ -1,7 +1,7 @@
 # TODO LIST
 - [ ] overlap inference
 - [ ] Prectime 
-- [ ] Add post-preprocess
+- [x] Add post-preprocess
 - [ ] Ensemble
 
 # Child Mind Institute - Detect Sleep States
