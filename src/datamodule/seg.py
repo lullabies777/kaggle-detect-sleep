@@ -76,7 +76,7 @@ def random_crop(pos: int, duration: int, max_end, cfg: DictConfig) -> tuple[int,
     """Randomly crops with duration length including pos.
     However, 0<=start, end<=max_end
     """
-    start = random.randint(max(cfg.overlap_interval, pos - duration), min(pos, max_end - duration - cfg.overlap_interval, max(cfg.overlap_interval, pos - duration)))
+    start = random.randint(max(cfg.overlap_interval, pos - duration), max(max(cfg.overlap_interval, pos - duration), min(pos, max_end - duration - cfg.overlap_interval)))
     end = start + duration
     return start, end
 
@@ -193,7 +193,7 @@ class TrainDataset(Dataset):
 
         # crop
         start, end = random_crop(pos, self.cfg.duration, n_steps, cfg = self.cfg)
-        feature = this_feature[start - self.cfg.overlap_interval : end + self.cfg.overlap_interval]  # (duration, num_features)
+        feature = this_feature[start - self.cfg.overlap_interval : end + self.cfg.overlap_interval]  # (duration, num_features + 2 * self.cfg.overlap_interval)
         # pad if needed
         feature = pad_if_needed(feature, self.cfg.duration + 2 * self.cfg.overlap_interval)
 
