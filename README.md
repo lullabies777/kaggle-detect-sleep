@@ -1,13 +1,13 @@
 # TODO LIST
 - [ ] Overlap Inference
 - [ ] Prectime Structure
-- [x] ~~More post-preprocess
+- [x] ~~More post-preprocess~~
 - [ ] Ensemble
 - [ ] More Loss Function
-- [x] ~~More encoders: U-Net++
+- [x] ~~More encoders: U-Net++~~
 - [ ] More features
 - [ ] Feature embedding
-- [x] ~~Wandb sweep
+- [x] ~~Wandb sweep~~
 
 # Use Wandb sweep
 - If needed, modify `sweep.yaml` first.

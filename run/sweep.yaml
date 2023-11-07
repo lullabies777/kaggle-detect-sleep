@@ -22,3 +22,4 @@ command:
 - ${program}
 - ${args_no_hyphens}
 - encoder=UNet++
+- exp_name=UNet++

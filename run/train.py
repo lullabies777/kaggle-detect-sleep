@@ -42,7 +42,8 @@ def main(cfg: DictConfig):  # type: ignore
     )
     with wandb.init(name=cfg.exp_name + "_" + s, project="child-mind-institute-detect-sleep-states", 
                     config = omegaconf.OmegaConf.to_container(
-        cfg, resolve=True, throw_on_missing=True)
+                                    cfg, resolve=True, throw_on_missing=True
+                    )
         ) as run:
         # init lightning model
         datamodule = SegDataModule(cfg)
