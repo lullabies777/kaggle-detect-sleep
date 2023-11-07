@@ -43,7 +43,7 @@ class Spec2DCNN(nn.Module):
             dict[str, torch.Tensor]: logits (batch_size, n_timesteps, n_classes)
         """
         
-        assert x.shape[-1] == self.cfg.duration, f"x shape: {x.shape}, duration: {self.cfg.duration}"
+        assert x.shape[-1] == (self.cfg.duration + 2 * self.cfg.overlap_interval), f"x shape: {x.shape}, duration: {self.cfg.duration}, overlap_interval: {self.cfg.overlap_interval}"
         x = self.feature_extractor(x)  # (batch_size, n_channels, height, n_timesteps)
         
         if do_mixup and labels is not None:
@@ -53,15 +53,20 @@ class Spec2DCNN(nn.Module):
 
         x = self.encoder(x).squeeze(1)  # (batch_size, height, n_timesteps)
         logits = self.decoder(x)  # (batch_size, n_classes, n_timesteps)
+        
+        # reduce overlap_interval 
+        logits = logits[..., self.cfg.overlap_interval // self.cfg.downsample_rate : - self.cfg.overlap_interval // self.cfg.downsample_rate]
 
         output = {"logits": logits}
         if labels is not None:
-            if cfg.loss.name == "kl":
+            assert logits.shape[-1] == labels.shape[-1], f"logits shape: {logits.shape}, labels shape: {labels.shape}"
+            
+            if self.cfg.loss.name == "kl":
                     logits = logits.sigmoid()
 
             loss = self.loss_fn(logits, labels)
             
-            weight = labels.clone() * cfg.loss.weight 
+            weight = labels.clone() * self.cfg.loss.weight 
             weight += 1.0
             loss = loss * weight 
             

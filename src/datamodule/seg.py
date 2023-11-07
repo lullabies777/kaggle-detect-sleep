@@ -12,7 +12,7 @@ from torch.utils.data import Dataset
 from torchvision.transforms.functional import resize
 
 from src.utils.common import pad_if_needed
-
+import torch.nn.functional as F
 
 ###################
 # Load Functions
@@ -44,6 +44,7 @@ def load_chunk_features(
     series_ids: Optional[list[str]],
     processed_dir: Path,
     phase: str,
+    cfg: DictConfig
 ) -> dict[str, np.ndarray]:
     features = {}
 
@@ -57,9 +58,12 @@ def load_chunk_features(
             this_feature.append(np.load(series_dir / f"{feature_name}.npy"))
         this_feature = np.stack(this_feature, axis=1)
         num_chunks = (len(this_feature) // duration) + 1
+        
         for i in range(num_chunks):
-            chunk_feature = this_feature[i * duration : (i + 1) * duration]
-            chunk_feature = pad_if_needed(chunk_feature, duration, pad_value=0)  # type: ignore
+            if i == 0:
+                this_feature = np.pad(this_feature, ((cfg.overlap_interval,0),(0,0)), 'constant')
+            chunk_feature = this_feature[i * duration : (i + 1) * duration + 2 * cfg.overlap_interval]
+            chunk_feature = pad_if_needed(chunk_feature, duration + 2 * cfg.overlap_interval, pad_value=0)  # type: ignore
             features[f"{series_id}_{i:07}"] = chunk_feature
 
     return features  # type: ignore
@@ -68,11 +72,11 @@ def load_chunk_features(
 ###################
 # Augmentation
 ###################
-def random_crop(pos: int, duration: int, max_end) -> tuple[int, int]:
+def random_crop(pos: int, duration: int, max_end, cfg: DictConfig) -> tuple[int, int]:
     """Randomly crops with duration length including pos.
     However, 0<=start, end<=max_end
     """
-    start = random.randint(max(0, pos - duration), min(pos, max_end - duration))
+    start = random.randint(max(cfg.overlap_interval, pos - duration), min(pos, max_end - duration - cfg.overlap_interval))
     end = start + duration
     return start, end
 
@@ -144,8 +148,8 @@ def nearest_valid_size(input_size: int, downsample_rate: int) -> int:
     を満たすinput_sizeに最も近いxを返す
     """
 
-    while (input_size // downsample_rate) % 32 != 0:
-        input_size += 1
+    # while (input_size // downsample_rate) % 32 != 0:
+    #     input_size += 1
     assert (input_size // downsample_rate) % 32 == 0
 
     return input_size
@@ -167,7 +171,7 @@ class TrainDataset(Dataset):
         self.features = features
         self.num_features = len(cfg.features)
         self.upsampled_num_frames = nearest_valid_size(
-            int(self.cfg.duration * self.cfg.upsample_rate), self.cfg.downsample_rate
+            int((self.cfg.duration + 2 * cfg.overlap_interval) * self.cfg.upsample_rate), self.cfg.downsample_rate
         )
 
     def __len__(self):
@@ -188,11 +192,11 @@ class TrainDataset(Dataset):
             pos = negative_sampling(this_event_df, n_steps)
 
         # crop
-        start, end = random_crop(pos, self.cfg.duration, n_steps)
-        feature = this_feature[start:end]  # (duration, num_features)
+        start, end = random_crop(pos, self.cfg.duration, n_steps, cfg = self.cfg)
+        feature = this_feature[start - self.cfg.overlap_interval : end + self.cfg.overlap_interval]  # (duration, num_features)
 
         # upsample
-        feature = torch.FloatTensor(feature.T).unsqueeze(0)  # (1, num_features, duration)
+        feature = torch.FloatTensor(feature.T).unsqueeze(0)  # (1, num_features, duration + 2 * self.cfg.overlap_interval)
         feature = resize(
             feature,
             size=[self.num_features, self.upsampled_num_frames],
@@ -200,7 +204,7 @@ class TrainDataset(Dataset):
         ).squeeze(0)
 
         # from hard label to gaussian label
-        num_frames = self.upsampled_num_frames // self.cfg.downsample_rate
+        num_frames = (self.upsampled_num_frames - 2 * self.cfg.overlap_interval) // self.cfg.downsample_rate
         label = get_label(this_event_df, num_frames, self.cfg.duration, start, end)
         label[:, [1, 2]] = gaussian_label(
             label[:, [1, 2]], offset=self.cfg.offset, sigma=self.cfg.sigma
@@ -230,7 +234,7 @@ class ValidDataset(Dataset):
         )
         self.num_features = len(cfg.features)
         self.upsampled_num_frames = nearest_valid_size(
-            int(self.cfg.duration * self.cfg.upsample_rate), self.cfg.downsample_rate
+            int((self.cfg.duration + 2 * cfg.overlap_interval) * self.cfg.upsample_rate), self.cfg.downsample_rate
         )
 
     def __len__(self):
@@ -239,7 +243,7 @@ class ValidDataset(Dataset):
     def __getitem__(self, idx):
         key = self.keys[idx]
         feature = self.chunk_features[key]
-        feature = torch.FloatTensor(feature.T).unsqueeze(0)  # (1, num_features, duration)
+        feature = torch.FloatTensor(feature.T).unsqueeze(0)  # (1, num_features, duration + 2 * cfg.overlap_interval)
         feature = resize(
             feature,
             size=[self.num_features, self.upsampled_num_frames],
@@ -250,7 +254,7 @@ class ValidDataset(Dataset):
         chunk_id = int(chunk_id)
         start = chunk_id * self.cfg.duration
         end = start + self.cfg.duration
-        num_frames = self.upsampled_num_frames // self.cfg.downsample_rate
+        num_frames = (self.upsampled_num_frames - 2 * self.cfg.overlap_interval) // self.cfg.downsample_rate
         label = get_label(
             self.event_df.query("series_id == @series_id").reset_index(drop=True),
             num_frames,
@@ -276,7 +280,7 @@ class TestDataset(Dataset):
         self.keys = list(chunk_features.keys())
         self.num_features = len(cfg.features)
         self.upsampled_num_frames = nearest_valid_size(
-            int(self.cfg.duration * self.cfg.upsample_rate), self.cfg.downsample_rate
+            int((self.cfg.duration + 2 * self.cfg.overlap_interval)* self.cfg.upsample_rate), self.cfg.downsample_rate
         )
 
     def __len__(self):
@@ -285,7 +289,7 @@ class TestDataset(Dataset):
     def __getitem__(self, idx):
         key = self.keys[idx]
         feature = self.chunk_features[key]
-        feature = torch.FloatTensor(feature.T).unsqueeze(0)  # (1, num_features, duration)
+        feature = torch.FloatTensor(feature.T).unsqueeze(0)  # (1, num_features, duration + 2 * self.cfg.overlap_interval)
         feature = resize(
             feature,
             size=[self.num_features, self.upsampled_num_frames],

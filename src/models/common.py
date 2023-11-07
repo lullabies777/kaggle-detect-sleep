@@ -20,6 +20,8 @@ FEATURE_EXTRACTORS = Union[
 ]
 DECODERS = Union[UNet1DDecoder, LSTMDecoder, TransformerDecoder, MLPDecoder]
 MODELS = Union[Spec1D, Spec2DCNN]
+import torch
+import torch.nn.functional as F 
 
 class FocalLoss(nn.Module):
     def __init__(self, weight=None, size_average=True, alpha=1., gamma=2.):

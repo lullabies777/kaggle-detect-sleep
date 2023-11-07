@@ -23,6 +23,7 @@ exp_name: dummy
 duration: 5760 # duration * 5 = 秒数
 downsample_rate: 2
 upsample_rate: 1
+overlap_interval: 0
 
 # training
 epoch: 50
