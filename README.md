@@ -1,9 +1,12 @@
 # TODO LIST
 - [ ] overlap inference
-- [ ] Prectime 
+- [ ] Prectime Structure
 - [x] Add post-preprocess
 - [ ] Ensemble
-
+- [ ] More Loss Function
+- [x] U-Net++
+- [ ] More features
+- [ ] Feature embedding
 # Child Mind Institute - Detect Sleep States
 
 This repository is for [Child Mind Institute - Detect Sleep States](https://www.kaggle.com/competitions/child-mind-institute-detect-sleep-states/overview)

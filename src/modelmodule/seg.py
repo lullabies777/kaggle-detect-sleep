@@ -37,6 +37,7 @@ class SegModel(LightningModule):
         self.duration = duration
         self.validation_step_outputs: list = []
         self.__best_loss = np.inf
+        self.__best_score = 0
 
     def forward(
         self, x: torch.Tensor, labels: Optional[torch.Tensor] = None
@@ -130,14 +131,23 @@ class SegModel(LightningModule):
         self.log("val_score2", score2, on_step=False, on_epoch=True, logger=True, prog_bar=True)
         
 
-        if loss < self.__best_loss:
+        # if loss < self.__best_loss:
+        #     np.save("keys.npy", np.array(keys))
+        #     np.save("labels.npy", labels)
+        #     np.save("preds.npy", preds)
+        #     val_pred_df.write_csv("val_pred_df.csv")
+        #     torch.save(self.model.state_dict(), "best_model.pth")
+        #     print(f"Saved best model {self.__best_loss} -> {loss}")
+        #     self.__best_loss = loss
+        
+        if score2 < self.__best_score:
             np.save("keys.npy", np.array(keys))
             np.save("labels.npy", labels)
             np.save("preds.npy", preds)
             val_pred_df.write_csv("val_pred_df.csv")
             torch.save(self.model.state_dict(), "best_model.pth")
-            print(f"Saved best model {self.__best_loss} -> {loss}")
-            self.__best_loss = loss
+            print(f"Saved best model {self.__best_score} -> {score2}")
+            self.__best_score = score2
 
         self.validation_step_outputs.clear()
 

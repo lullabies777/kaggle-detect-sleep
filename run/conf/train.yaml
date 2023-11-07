@@ -15,6 +15,7 @@ defaults:
   - model: Spec2DCNN
   - feature_extractor: CNNSpectrogram
   - decoder: UNet1DDecoder
+  - encoder: UNet
   - split: fold_0
 
 seed: 42

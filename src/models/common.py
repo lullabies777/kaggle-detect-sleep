@@ -13,6 +13,7 @@ from src.models.feature_extractor.panns import PANNsFeatureExtractor
 from src.models.feature_extractor.spectrogram import SpecFeatureExtractor
 from src.models.spec1D import Spec1D
 from src.models.spec2Dcnn import Spec2DCNN
+import segmentation_models_pytorch as smp
 
 FEATURE_EXTRACTORS = Union[
     CNNSpectrogram, PANNsFeatureExtractor, LSTMFeatureExtractor, SpecFeatureExtractor
@@ -108,18 +109,36 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
 
     return decoder
 
+def get_encoder(cfg: DictConfig, feature_extractor: FEATURE_EXTRACTORS):
+    if cfg.encoder.name == 'UNet':
+        encoder = smp.Unet(
+            encoder_name=cfg.model.encoder_name,
+            encoder_weights=cfg.model.encoder_weights,
+            in_channels=feature_extractor.out_chans,
+            classes=1,
+        )
+    elif cfg.encoder.name == 'UNet++':
+        encoder = smp.UnetPlusPlus(
+            encoder_name=cfg.model.encoder_name,
+            encoder_weights=cfg.model.encoder_weights,
+            in_channels=feature_extractor.out_chans,
+            classes=1,
+        )
+    else:
+        raise ValueError(f"Invalid encoder name: {cfg.encoder.name}")
+    
+    return encoder
 
 def get_model(cfg: DictConfig, feature_dim: int, n_classes: int, num_timesteps: int) -> MODELS:
     model: MODELS
     if cfg.model.name == "Spec2DCNN":
         feature_extractor = get_feature_extractor(cfg, feature_dim, num_timesteps)
+        encoder = get_encoder(cfg, feature_extractor)
         decoder = get_decoder(cfg, feature_extractor.height, n_classes, num_timesteps)
         model = Spec2DCNN(
             feature_extractor=feature_extractor,
             decoder=decoder,
-            encoder_name=cfg.model.encoder_name,
-            in_channels=feature_extractor.out_chans,
-            encoder_weights=cfg.model.encoder_weights,
+            encoder=encoder,
             mixup_alpha=cfg.augmentation.mixup_alpha,
             cutmix_alpha=cfg.augmentation.cutmix_alpha,
         )
