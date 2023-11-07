@@ -44,6 +44,7 @@ class Spec2DCNN(nn.Module):
         """
         
         assert x.shape[-1] == (self.cfg.duration + 2 * self.cfg.overlap_interval), f"x shape: {x.shape}, duration: {self.cfg.duration}, overlap_interval: {self.cfg.overlap_interval}"
+        print(x.shape)
         x = self.feature_extractor(x)  # (batch_size, n_channels, height, n_timesteps)
         
         if do_mixup and labels is not None:
