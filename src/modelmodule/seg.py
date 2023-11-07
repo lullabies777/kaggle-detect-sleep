@@ -27,7 +27,7 @@ class SegModel(LightningModule):
         super().__init__()
         self.cfg = cfg
         self.val_event_df = val_event_df
-        num_timesteps = nearest_valid_size(int(duration * cfg.upsample_rate), cfg.downsample_rate)
+        num_timesteps = nearest_valid_size(int((duration + 2 * cfg.overlap_interval)* cfg.upsample_rate), cfg.downsample_rate)
         self.model = get_model(
             cfg,
             feature_dim=feature_dim,
