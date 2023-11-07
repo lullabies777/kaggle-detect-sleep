@@ -6,7 +6,7 @@ import torch.nn as nn
 
 from src.augmentation.cutmix import Cutmix
 from src.augmentation.mixup import Mixup
-
+from src.models.common import get_loss
 
 class Spec2DCNN(nn.Module):
     def __init__(
@@ -24,7 +24,7 @@ class Spec2DCNN(nn.Module):
         self.decoder = decoder
         self.mixup = Mixup(mixup_alpha)
         self.cutmix = Cutmix(cutmix_alpha)
-        self.loss_fn = nn.BCEWithLogitsLoss()
+        self.loss_fn = get_loss(cfg)
         self.cfg = cfg
 
     def forward(
@@ -56,7 +56,15 @@ class Spec2DCNN(nn.Module):
 
         output = {"logits": logits}
         if labels is not None:
+            if cfg.loss.name == "kl":
+                    logits = logits.sigmoid()
+
             loss = self.loss_fn(logits, labels)
-            output["loss"] = loss
+            
+            weight = labels.clone() * cfg.loss.weight 
+            weight += 1.0
+            loss = loss * weight 
+            
+            output["loss"] = loss.mean()
 
         return output

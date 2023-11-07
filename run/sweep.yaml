@@ -1,4 +1,5 @@
 program: run/train.py
+name: UNet++
 metric:
   name: val_score2
   goal: maximize

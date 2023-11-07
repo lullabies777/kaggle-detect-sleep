@@ -3,7 +3,7 @@
 - [ ] Prectime Structure
 - [x] ~~More post-preprocess~~
 - [ ] Ensemble
-- [ ] More Loss Function
+- [x] ~~More Loss Function: Now support `bce`, `mse`, `focal`, `kl` and weight for pos labels (controlled by loss.weight, 0 by default)~~
 - [x] ~~More encoders: U-Net++~~
 - [ ] More features
 - [ ] Feature embedding

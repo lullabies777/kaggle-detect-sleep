@@ -80,3 +80,10 @@ optimizer:
 # scheduler
 scheduler:
   num_warmup_steps: 0
+  
+# criterion
+loss:
+  name: "bce"
+  alpha: 1.0
+  gamma: 2.0
+  weight: 0
