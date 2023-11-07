@@ -1,0 +1,24 @@
+program: run/train.py
+metric:
+  name: val_score2
+  goal: maximize
+
+method: bayes
+parameters:
+  optimizer.lr:
+    values: [1e-4, 2e-4, 4e-4, 6e-4, 8e-5, 1e-5]
+  offset:
+    values: [10, 30, 50]
+  sigma:
+    values: [3, 5, 10, 20]
+  duration:
+    values: [5760, 11520, 17200]
+  downsample_rate:
+    values: [2, 4, 6, 8]
+
+command:
+- ${env}
+- ${interpreter}
+- ${program}
+- ${args_no_hyphens}
+- encoder=UNet++

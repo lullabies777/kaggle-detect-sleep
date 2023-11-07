@@ -14,6 +14,7 @@ class Spec2DCNN(nn.Module):
         feature_extractor: nn.Module,
         decoder: nn.Module,
         encoder: nn.Module,
+        cfg,
         mixup_alpha: float = 0.5,
         cutmix_alpha: float = 0.5,
     ):
@@ -24,6 +25,7 @@ class Spec2DCNN(nn.Module):
         self.mixup = Mixup(mixup_alpha)
         self.cutmix = Cutmix(cutmix_alpha)
         self.loss_fn = nn.BCEWithLogitsLoss()
+        self.cfg = cfg
 
     def forward(
         self,
@@ -40,8 +42,10 @@ class Spec2DCNN(nn.Module):
         Returns:
             dict[str, torch.Tensor]: logits (batch_size, n_timesteps, n_classes)
         """
+        
+        assert x.shape[-1] == self.cfg.duration, f"X shape: {X.shape}, duration: {self.cfg.duration}"
         x = self.feature_extractor(x)  # (batch_size, n_channels, height, n_timesteps)
-
+        
         if do_mixup and labels is not None:
             x, labels = self.mixup(x, labels)
         if do_cutmix and labels is not None:

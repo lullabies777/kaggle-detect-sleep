@@ -24,7 +24,8 @@ class CNNSpectrogram(nn.Module):
         if isinstance(base_filters, int):
             base_filters = tuple([base_filters])
         self.height = base_filters[-1]
-        self.spec_conv = nn.ModuleList()
+        # multi-scale extracting
+        self.spec_conv = nn.ModuleList() 
         for i in range(self.out_chans):
             tmp_block = [
                 conv(

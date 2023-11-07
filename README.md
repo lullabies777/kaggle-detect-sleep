@@ -1,12 +1,23 @@
 # TODO LIST
-- [ ] overlap inference
+- [ ] Overlap Inference
 - [ ] Prectime Structure
-- [x] Add post-preprocess
+- [x] More post-preprocess
 - [ ] Ensemble
 - [ ] More Loss Function
-- [x] U-Net++
+- [x] More encoders: U-Net++
 - [ ] More features
 - [ ] Feature embedding
+- [x] Wandb sweep
+
+# Use Wandb sweep
+- If needed, modify `sweep.yaml` first.
+
+- Initiate WandB sweep as: `$ wandb sweep wandb_sweep.yaml`
+
+- Run Agent
+  Creating a sweep returns a wandb agent command like:
+  ![Screenshot showing result returned by wandb sweep command](https://user-images.githubusercontent.com/13994201/153241187-dfa308b6-c52e-4f0a-9f4d-f47b356b1088.png)
+- Next invoke the `wandb agent path/to/sweep` command provided in the output of the previous command.
 # Child Mind Institute - Detect Sleep States
 
 This repository is for [Child Mind Institute - Detect Sleep States](https://www.kaggle.com/competitions/child-mind-institute-detect-sleep-states/overview)
