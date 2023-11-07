@@ -52,14 +52,14 @@ class Spec2DCNN(nn.Module):
             x, labels = self.cutmix(x, labels)
 
         x = self.encoder(x).squeeze(1)  # (batch_size, height, n_timesteps)
-        logits = self.decoder(x)  # (batch_size, n_classes, n_timesteps)
+        logits = self.decoder(x)  # (batch_size, n_timesteps, n_classes)
         
         # reduce overlap_interval 
-        logits = logits[..., self.cfg.overlap_interval // self.cfg.downsample_rate : - self.cfg.overlap_interval // self.cfg.downsample_rate]
+        logits = logits[:, self.cfg.overlap_interval // self.cfg.downsample_rate : - self.cfg.overlap_interval // self.cfg.downsample_rate, :]
 
         output = {"logits": logits}
         if labels is not None:
-            assert logits.shape[-1] == labels.shape[-1], f"logits shape: {logits.shape}, labels shape: {labels.shape}"
+            assert logits.shape == labels.shape, f"logits shape: {logits.shape}, labels shape: {labels.shape}"
             
             if self.cfg.loss.name == "kl":
                     logits = logits.sigmoid()
