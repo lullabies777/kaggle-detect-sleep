@@ -43,7 +43,7 @@ class Spec2DCNN(nn.Module):
             dict[str, torch.Tensor]: logits (batch_size, n_timesteps, n_classes)
         """
         
-        assert x.shape[-1] == self.cfg.duration, f"X shape: {X.shape}, duration: {self.cfg.duration}"
+        assert x.shape[-1] == self.cfg.duration, f"x shape: {x.shape}, duration: {self.cfg.duration}"
         x = self.feature_extractor(x)  # (batch_size, n_channels, height, n_timesteps)
         
         if do_mixup and labels is not None:
