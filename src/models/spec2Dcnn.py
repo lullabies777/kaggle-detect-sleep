@@ -55,7 +55,7 @@ class Spec2DCNN(nn.Module):
         logits = self.decoder(x)  # (batch_size, n_timesteps, n_classes)
         
         # reduce overlap_interval 
-        logits = logits[:, self.cfg.overlap_interval // self.cfg.downsample_rate : - self.cfg.overlap_interval // self.cfg.downsample_rate, :]
+        logits = logits[:, (self.cfg.overlap_interval // self.cfg.downsample_rate) : logits.shape[1] - (self.cfg.overlap_interval // self.cfg.downsample_rate), :]
 
         output = {"logits": logits}
         if labels is not None:
