@@ -46,7 +46,7 @@ class Spec2DCNN(nn.Module):
         assert x.shape[-1] == (self.cfg.duration + 2 * self.cfg.overlap_interval), f"x shape: {x.shape}, duration: {self.cfg.duration}, overlap_interval: {self.cfg.overlap_interval}"
         print(x.shape)
         x = self.feature_extractor(x)  # (batch_size, n_channels, height, n_timesteps)
-        
+        print(x.shape)
         if do_mixup and labels is not None:
             x, labels = self.mixup(x, labels)
         if do_cutmix and labels is not None:
@@ -54,10 +54,10 @@ class Spec2DCNN(nn.Module):
 
         x = self.encoder(x).squeeze(1)  # (batch_size, height, n_timesteps)
         logits = self.decoder(x)  # (batch_size, n_timesteps, n_classes)
-        
+        print(logits.shape)
         # reduce overlap_interval 
         logits = logits[:, (self.cfg.overlap_interval // self.cfg.downsample_rate) : logits.shape[1] - (self.cfg.overlap_interval // self.cfg.downsample_rate), :]
-
+        print(logits.shape)
         output = {"logits": logits}
         if labels is not None:
             assert logits.shape == labels.shape, f"logits shape: {logits.shape}, labels shape: {labels.shape}"
