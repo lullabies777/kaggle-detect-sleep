@@ -14,7 +14,7 @@ parameters:
   duration:
     values: [5760, 11520, 17200]
   downsample_rate:
-    values: [2, 4, 6, 8]
+    values: [2, 6, 12]
 
 command:
 - ${env}
