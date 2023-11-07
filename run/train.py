@@ -40,6 +40,8 @@ def main(cfg: DictConfig):  # type: ignore
         name=cfg.exp_name + "_" + s,
         project="child-mind-institute-detect-sleep-states",
     )
+    pl_logger.log_hyperparams(cfg)
+    
     with wandb.init(name=cfg.exp_name + "_" + s, project="child-mind-institute-detect-sleep-states", 
                     config = omegaconf.OmegaConf.to_container(
                                     cfg, resolve=True, throw_on_missing=True
