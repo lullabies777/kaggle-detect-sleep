@@ -333,6 +333,7 @@ class SegDataModule(LightningDataModule):
             series_ids=self.cfg.split.valid_series_ids,
             processed_dir=self.processed_dir,
             phase="train",
+            cfg = cfg
         )
 
     def train_dataloader(self):
