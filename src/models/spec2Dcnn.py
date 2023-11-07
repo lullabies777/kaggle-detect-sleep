@@ -6,7 +6,7 @@ import torch.nn as nn
 
 from src.augmentation.cutmix import Cutmix
 from src.augmentation.mixup import Mixup
-from src.models.common import get_loss
+from src.models.losses import get_loss
 
 class Spec2DCNN(nn.Module):
     def __init__(
