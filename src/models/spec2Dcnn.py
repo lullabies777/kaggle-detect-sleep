@@ -62,13 +62,21 @@ class Spec2DCNN(nn.Module):
         if labels is not None:
             assert logits.shape == labels.shape, f"logits shape: {logits.shape}, labels shape: {labels.shape}"
             
-            if self.cfg.loss.name == "kl":
-                    logits = logits.sigmoid()
-
-            loss = self.loss_fn(logits, labels)
-            
             weight = labels.clone() * self.cfg.loss.weight 
             weight += 1.0
+            
+            if self.cfg.loss.name == "kl":
+                # labels = labels / labels.sum(dim = -1, keepdim = True)
+                labels = labels.softmax(dim = -1)
+                # logits = logits.sigmoid()
+                # logits = logits / logits.sum(dim = -1, keepdim = True)
+                logits = logits.softmax(dim = -1)
+                
+                loss = self.loss_fn(logits.log(), labels)
+                    
+            else:
+                loss = self.loss_fn(logits, labels)
+
             loss = loss * weight 
             
             output["loss"] = loss.mean()

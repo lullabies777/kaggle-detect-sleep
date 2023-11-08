@@ -105,7 +105,7 @@ def main(cfg: DictConfig):
                     pl.col("series_id"), 
                     pl.col("anglez"), 
                     pl.col("enmo"), 
-                    pl.col("timestamp")
+                    pl.col("timestamp"),
                     pl.col("anglez_rad")
                 ]
             )
