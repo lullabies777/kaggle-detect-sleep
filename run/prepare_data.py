@@ -49,8 +49,7 @@ def deg_to_rad(x: pl.Expr) -> pl.Expr:
     return np.pi / 180 * x
 
 def add_feature(series_df: pl.DataFrame) -> pl.DataFrame:
-    series_df = series_df.with_row_count("step")
-        .with_columns(
+    series_df = series_df.with_row_count("step").with_columns(
         *to_coord(pl.col("timestamp").dt.hour(), 24, "hour"),
         *to_coord(pl.col("timestamp").dt.month(), 12, "month"),
         *to_coord(pl.col("timestamp").dt.minute(), 60, "minute"),
