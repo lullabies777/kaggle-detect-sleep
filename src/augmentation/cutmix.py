@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 
-def get_rand_1dbbox(n_timesteps: int, lam: float) -> tuple[int, int]:
+def get_rand_1dbbox(n_timesteps: int, lam: float) -> tuple:
     """Get random 1D bounding box.
 
     Args:
@@ -27,7 +27,7 @@ class Cutmix:
 
     def __call__(
         self, imgs: torch.Tensor, labels: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple:
         """Cutmix augmentation.
 
         Args:

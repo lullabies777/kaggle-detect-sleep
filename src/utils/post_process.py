@@ -4,7 +4,7 @@ from scipy.signal import find_peaks
 
 
 def post_process_for_seg(
-    keys: list[str], preds: np.ndarray, score_th: float = 0.01, distance: int = 5000
+    keys: list, preds: np.ndarray, score_th: float = 0.01, distance: int = 5000
 ) -> pl.DataFrame:
     """make submission dataframe for segmentation task
 
@@ -78,7 +78,7 @@ def get_results_slide_window(pred, gap):
     return stack
 
 def post_process_for_seg_v2(
-    keys: list[str], preds: np.ndarray,  gap: int = 180, quantile: float = 0.9
+    keys: list, preds: np.ndarray,  gap: int = 180, quantile: float = 0.9
 )-> pl.DataFrame:
     """make submission dataframe for segmentation task
 

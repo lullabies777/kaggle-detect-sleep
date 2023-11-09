@@ -41,7 +41,7 @@ class SegModel(LightningModule):
 
     def forward(
         self, x: torch.Tensor, labels: Optional[torch.Tensor] = None
-    ) -> dict[str, Optional[torch.Tensor]]:
+    ) -> dict:
         return self.model(x, labels)
 
     def training_step(self, batch, batch_idx):

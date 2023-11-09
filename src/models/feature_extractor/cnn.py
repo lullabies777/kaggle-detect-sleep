@@ -9,7 +9,7 @@ class CNNSpectrogram(nn.Module):
     def __init__(
         self,
         in_channels: int = 3,
-        base_filters: int | tuple = 128,
+        base_filters = 128,
         kernel_sizes: tuple = (32, 16, 4, 2),
         stride: int = 4,
         sigmoid: bool = False,

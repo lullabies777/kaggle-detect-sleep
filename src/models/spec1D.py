@@ -29,7 +29,7 @@ class Spec1D(nn.Module):
         labels: Optional[torch.Tensor] = None,
         do_mixup: bool = False,
         do_cutmix: bool = False,
-    ) -> dict[str, torch.Tensor]:
+    ) -> dict:
         """Forward pass of the model.
 
         Args:

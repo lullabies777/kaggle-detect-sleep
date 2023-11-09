@@ -18,11 +18,11 @@ import torch.nn.functional as F
 # Load Functions
 ###################
 def load_features(
-    feature_names: list[str],
-    series_ids: Optional[list[str]],
+    feature_names: list,
+    series_ids: Optional[list],
     processed_dir: Path,
     phase: str,
-) -> dict[str, np.ndarray]:
+) -> dict:
     features = {}
 
     if series_ids is None:
@@ -40,12 +40,12 @@ def load_features(
 
 def load_chunk_features(
     duration: int,
-    feature_names: list[str],
-    series_ids: Optional[list[str]],
+    feature_names: list,
+    series_ids: Optional[list],
     processed_dir: Path,
     phase: str,
     cfg: DictConfig
-) -> dict[str, np.ndarray]:
+) -> dict:
     features = {}
 
     if series_ids is None:
@@ -72,7 +72,7 @@ def load_chunk_features(
 ###################
 # Augmentation
 ###################
-def random_crop(pos: int, duration: int, max_end, cfg: DictConfig) -> tuple[int, int]:
+def random_crop(pos: int, duration: int, max_end, cfg: DictConfig) -> tuple:
     """Randomly crops with duration length including pos.
     However, 0<=start, end<=max_end
     """
@@ -160,7 +160,7 @@ class TrainDataset(Dataset):
         self,
         cfg: DictConfig,
         event_df: pl.DataFrame,
-        features: dict[str, np.ndarray],
+        features: dict,
     ):
         self.cfg = cfg
         self.event_df: pd.DataFrame = (
@@ -223,7 +223,7 @@ class ValidDataset(Dataset):
     def __init__(
         self,
         cfg: DictConfig,
-        chunk_features: dict[str, np.ndarray],
+        chunk_features: dict,
         event_df: pl.DataFrame,
     ):
         self.cfg = cfg
@@ -275,7 +275,7 @@ class TestDataset(Dataset):
     def __init__(
         self,
         cfg: DictConfig,
-        chunk_features: dict[str, np.ndarray],
+        chunk_features: dict,
     ):
         self.cfg = cfg
         self.chunk_features = chunk_features

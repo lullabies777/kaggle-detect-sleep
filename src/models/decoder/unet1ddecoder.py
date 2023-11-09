@@ -187,7 +187,7 @@ class UNet1DDecoder(nn.Module):
 
     def forward(
         self, x: torch.Tensor, labels: Optional[torch.Tensor] = None
-    ) -> dict[str, Optional[torch.Tensor]]:
+    ) -> dict:
         """Forward
 
         Args:

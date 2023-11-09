@@ -8,7 +8,7 @@ class Mixup:
 
     def __call__(
         self, imgs: torch.Tensor, labels: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple:
         """Mixup augmentation.
 
         Args:
