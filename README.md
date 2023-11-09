@@ -8,6 +8,7 @@
 - [ ] More features
 - [ ] Feature embedding
 - [x] ~~Wandb sweep~~
+- [ ] scores on val
 
 # Use Wandb sweep
 - If needed, modify `sweep.yaml` first.
