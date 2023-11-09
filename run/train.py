@@ -14,7 +14,7 @@ from pytorch_lightning.callbacks import (
     RichProgressBar,
 )
 from pytorch_lightning.loggers import WandbLogger
-
+from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from src.datamodule.seg import SegDataModule
 from src.modelmodule.seg import SegModel
 from time import gmtime, strftime
@@ -33,75 +33,76 @@ def main(cfg: DictConfig):  # type: ignore
     
     # using simple format of showing time
     s = strftime("%a_%d_%b_%H_%M", gmtime())
-    
-
-    # init experiment logger
+                 
+    wandb.init(name=cfg.exp_name + "_" + s, project="child-mind-institute-detect-sleep-states")
+#     # init experiment logger
     pl_logger = WandbLogger(
         name=cfg.exp_name + "_" + s,
         project="child-mind-institute-detect-sleep-states",
     )
     pl_logger.log_hyperparams(cfg)
     
-    with wandb.init(name=cfg.exp_name + "_" + s, project="child-mind-institute-detect-sleep-states", 
-                    config = omegaconf.OmegaConf.to_container(
-                                    cfg, resolve=True, throw_on_missing=True
-                    )
-        ) as run:
-        # init lightning model
-        datamodule = SegDataModule(cfg)
-        LOGGER.info("Set Up DataModule")
-        model = SegModel(
-            cfg, datamodule.valid_event_df, len(cfg.features), len(cfg.labels), cfg.duration
-        )
+    # with wandb.init(name=cfg.exp_name + "_" + s, project="child-mind-institute-detect-sleep-states", 
+    #                 config = omegaconf.OmegaConf.to_container(
+    #                                 cfg, resolve=True, throw_on_missing=True
+    #                 )
+    #     ) as run:
+    #     # init lightning model
+    datamodule = SegDataModule(cfg)
+    LOGGER.info("Set Up DataModule")
+    model = SegModel(
+        cfg, datamodule.valid_event_df, len(cfg.features), len(cfg.labels), cfg.duration
+    )
 
-        # set callbacks
-        checkpoint_cb = ModelCheckpoint(
-            verbose=True,
-            monitor=cfg.monitor,
-            mode=cfg.monitor_mode,
-            save_top_k=1,
-            save_last=False,
-        )
-        lr_monitor = LearningRateMonitor("epoch")
-        progress_bar = RichProgressBar()
-        model_summary = RichModelSummary(max_depth=2)
+    # set callbacks
+    checkpoint_cb = ModelCheckpoint(
+        verbose=True,
+        monitor=cfg.monitor,
+        mode=cfg.monitor_mode,
+        save_top_k=1,
+        save_last=False,
+    )
+    lr_monitor = LearningRateMonitor("epoch")
+    progress_bar = RichProgressBar()
+    model_summary = RichModelSummary(max_depth=2)
 
+    early_stop_callback = EarlyStopping(monitor="val_score2", patience=7, verbose=False, mode="max")
+    
+    trainer = Trainer(
+        # env
+        default_root_dir=Path.cwd(),
+        # num_nodes=cfg.training.num_gpus,
+        accelerator=cfg.accelerator,
+        precision=16 if cfg.use_amp else 32,
+        # training
+        fast_dev_run=cfg.debug,  # run only 1 train batch and 1 val batch
+        max_epochs=cfg.epoch,
+        max_steps=cfg.epoch * len(datamodule.train_dataloader()),
+        gradient_clip_val=cfg.gradient_clip_val,
+        accumulate_grad_batches=cfg.accumulate_grad_batches,
+        callbacks=[checkpoint_cb, lr_monitor, progress_bar, model_summary, early_stop_callback],
+        logger=pl_logger,
+        # resume_from_checkpoint=resume_from,
+        num_sanity_val_steps=0,
+        log_every_n_steps=int(len(datamodule.train_dataloader()) * 0.1),
+        sync_batchnorm=True,
+        check_val_every_n_epoch=cfg.check_val_every_n_epoch,
+    )
 
-        trainer = Trainer(
-            # env
-            default_root_dir=Path.cwd(),
-            # num_nodes=cfg.training.num_gpus,
-            accelerator=cfg.accelerator,
-            precision=16 if cfg.use_amp else 32,
-            # training
-            fast_dev_run=cfg.debug,  # run only 1 train batch and 1 val batch
-            max_epochs=cfg.epoch,
-            max_steps=cfg.epoch * len(datamodule.train_dataloader()),
-            gradient_clip_val=cfg.gradient_clip_val,
-            accumulate_grad_batches=cfg.accumulate_grad_batches,
-            callbacks=[checkpoint_cb, lr_monitor, progress_bar, model_summary],
-            logger=pl_logger,
-            # resume_from_checkpoint=resume_from,
-            num_sanity_val_steps=0,
-            log_every_n_steps=int(len(datamodule.train_dataloader()) * 0.1),
-            sync_batchnorm=True,
-            check_val_every_n_epoch=cfg.check_val_every_n_epoch,
-        )
+    trainer.fit(model, datamodule=datamodule)
 
-        trainer.fit(model, datamodule=datamodule)
-
-        # load best weights
-        model = model.load_from_checkpoint(
-            checkpoint_cb.best_model_path,
-            cfg=cfg,
-            val_event_df=datamodule.valid_event_df,
-            feature_dim=len(cfg.features),
-            num_classes=len(cfg.labels),
-            duration=cfg.duration,
-        )
-        weights_path = str("model_weights.pth")  # type: ignore
-        LOGGER.info(f"Extracting and saving best weights: {weights_path}")
-        torch.save(model.model.state_dict(), weights_path)
+    # load best weights
+    model = model.load_from_checkpoint(
+        checkpoint_cb.best_model_path,
+        cfg=cfg,
+        val_event_df=datamodule.valid_event_df,
+        feature_dim=len(cfg.features),
+        num_classes=len(cfg.labels),
+        duration=cfg.duration,
+    )
+    weights_path = str("model_weights.pth")  # type: ignore
+    LOGGER.info(f"Extracting and saving best weights: {weights_path}")
+    torch.save(model.model.state_dict(), weights_path)
 
     return
 

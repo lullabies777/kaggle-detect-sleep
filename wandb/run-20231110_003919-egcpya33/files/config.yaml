@@ -1,0 +1,61 @@
+wandb_version: 1
+
+downsample_rate:
+  desc: null
+  value: 12
+duration:
+  desc: null
+  value: 17200
+offset:
+  desc: null
+  value: 30
+optimizer.lr:
+  desc: null
+  value: 0.0002
+sigma:
+  desc: null
+  value: 10
+_wandb:
+  desc: null
+  value:
+    python_version: 3.10.13
+    cli_version: 0.15.12
+    framework: huggingface
+    huggingface_version: 4.33.3
+    is_jupyter_run: false
+    is_kaggle_kernel: true
+    start_time: 1699547959.151322
+    t:
+      1:
+      - 1
+      - 9
+      - 11
+      - 41
+      - 49
+      - 50
+      - 55
+      - 63
+      - 74
+      - 103
+      2:
+      - 1
+      - 9
+      - 11
+      - 41
+      - 49
+      - 50
+      - 55
+      - 63
+      - 74
+      - 103
+      3:
+      - 13
+      - 23
+      - 37
+      4: 3.10.13
+      5: 0.15.12
+      6: 4.33.3
+      8:
+      - 2
+      - 5
+      13: linux-x86_64

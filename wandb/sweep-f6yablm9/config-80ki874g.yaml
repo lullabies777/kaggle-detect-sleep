@@ -1,0 +1,12 @@
+wandb_version: 1
+
+downsample_rate:
+  value: 6
+duration:
+  value: 11520
+offset:
+  value: 10
+optimizer.lr:
+  value: 0.0002
+sigma:
+  value: 3

@@ -1,5 +1,5 @@
-data_dir: /home/xuanming/kaggle/Detect Sleep States/child-mind-institute-detect-sleep-states
-processed_dir: /home/xuanming/kaggle/Detect Sleep States/child-mind-institute-detect-sleep-states/processed_data
-output_dir: /home/xuanming/kaggle/Detect Sleep States/output
-model_dir: /home/xuanming/kaggle/Detect Sleep States/output/train
+data_dir: /home/xuanming/kaggle-detect-sleep/data/
+processed_dir: /home/xuanming/kaggle-detect-sleep/data/processed_data
+output_dir: /home/xuanming/kaggle-detect-sleep/output/
+model_dir: /home/xuanming/kaggle-detect-sleep/output/train
 sub_dir: ./

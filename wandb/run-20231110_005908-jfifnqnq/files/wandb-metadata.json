@@ -1,0 +1,218 @@
+{
+    "os": "Linux-6.5.0-10-generic-x86_64-with-glibc2.38",
+    "python": "3.10.13",
+    "heartbeatAt": "2023-11-09T16:59:14.410327",
+    "startedAt": "2023-11-09T16:59:08.992303",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "downsample_rate=2",
+        "duration=11520",
+        "offset=10",
+        "optimizer.lr=0.0004",
+        "sigma=3",
+        "encoder=UNet++",
+        "exp_name=UNet++",
+        "loss.name=focal",
+        "loss.weight=10"
+    ],
+    "state": "running",
+    "program": "/home/xuanming/kaggle-detect-sleep/run/train.py",
+    "codePathLocal": "run/train.py",
+    "codePath": "run/train.py",
+    "git": {
+        "remote": "git@github.com:lullabies777/kaggle-detect-sleep.git",
+        "commit": "12c5615d94c2b14b3c006ae0093e5f193fcf09e3"
+    },
+    "email": null,
+    "root": "/home/xuanming/kaggle-detect-sleep",
+    "host": "xuanming777",
+    "username": "xuanming",
+    "executable": "/home/xuanming/anaconda3/envs/sleep/bin/python",
+    "cpu_count": 24,
+    "cpu_count_logical": 32,
+    "cpu_freq": {
+        "current": 1084.9376874999998,
+        "min": 800.0,
+        "max": 5087.5
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 1920.91,
+            "min": 800.0,
+            "max": 5700.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 5700.0
+        },
+        {
+            "current": 1948.974,
+            "min": 800.0,
+            "max": 5700.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 5700.0
+        },
+        {
+            "current": 1100.0,
+            "min": 800.0,
+            "max": 5700.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 5700.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 5700.0
+        },
+        {
+            "current": 1900.287,
+            "min": 800.0,
+            "max": 5700.0
+        },
+        {
+            "current": 3311.227,
+            "min": 800.0,
+            "max": 6000.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 6000.0
+        },
+        {
+            "current": 1902.638,
+            "min": 800.0,
+            "max": 6000.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 6000.0
+        },
+        {
+            "current": 1850.519,
+            "min": 800.0,
+            "max": 5700.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 5700.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 5700.0
+        },
+        {
+            "current": 1941.638,
+            "min": 800.0,
+            "max": 5700.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        },
+        {
+            "current": 800.0,
+            "min": 800.0,
+            "max": 4400.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 3591.620620727539,
+            "used": 60.73332214355469
+        }
+    },
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 4090",
+            "memory_total": 25757220864
+        }
+    ],
+    "memory": {
+        "total": 62.617740631103516
+    }
+}

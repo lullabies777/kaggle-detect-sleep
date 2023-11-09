@@ -13,7 +13,7 @@ parameters:
   sigma:
     values: [3, 5, 10, 20]
   duration:
-    values: [5760, 11520, 17200]
+    values: [5760, 11520, 17280]
   downsample_rate:
     values: [2, 6, 12]
 
@@ -24,3 +24,5 @@ command:
 - ${args_no_hyphens}
 - encoder=UNet++
 - exp_name=UNet++
+- loss.name=focal
+- loss.weight=10
