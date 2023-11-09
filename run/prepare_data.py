@@ -38,7 +38,7 @@ ENMO_MEAN = 0.041315
 ENMO_STD = 0.101829
 
 
-def to_coord(x: pl.Expr, max_: int, name: str) -> list[pl.Expr]:
+def to_coord(x: pl.Expr, max_: int, name: str) -> list:
     rad = 2 * np.pi * (x % max_) / max_
     x_sin = rad.sin()
     x_cos = rad.cos()
@@ -60,7 +60,7 @@ def add_feature(series_df: pl.DataFrame) -> pl.DataFrame:
     return series_df
 
 
-def save_each_series(this_series_df: pl.DataFrame, columns: list[str], output_dir: Path):
+def save_each_series(this_series_df: pl.DataFrame, columns: list, output_dir: Path):
     output_dir.mkdir(parents=True, exist_ok=True)
 
     for col_name in columns:
