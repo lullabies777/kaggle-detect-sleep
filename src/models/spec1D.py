@@ -12,16 +12,18 @@ class Spec1D(nn.Module):
         self,
         feature_extractor: nn.Module,
         decoder: nn.Module,
+        cfg,
         mixup_alpha: float = 0.5,
         cutmix_alpha: float = 0.5,
     ):
         super().__init__()
         self.feature_extractor = feature_extractor
         self.decoder = decoder
-        self.channels_fc = nn.Linear(feature_extractor.out_chans, 1)
+        self.channels_fc = nn.Linear(feature_extractor.out_chans * feature_extractor.height, feature_extractor.height)
         self.mixup = Mixup(mixup_alpha)
         self.cutmix = Cutmix(cutmix_alpha)
-        self.loss_fn = nn.BCEWithLogitsLoss()
+        self.loss_fn = get_loss(cfg)
+        self.cfg = cfg
 
     def forward(
         self,
@@ -44,11 +46,14 @@ class Spec1D(nn.Module):
             x, labels = self.mixup(x, labels)
         if do_cutmix and labels is not None:
             x, labels = self.cutmix(x, labels)
-
+        
         # pool over n_channels dimension
-        x = x.transpose(1, 3)  # (batch_size, n_timesteps, height, n_channels)
-        x = self.channels_fc(x)  # (batch_size, n_timesteps, height, 1)
-        x = x.squeeze(-1).transpose(1, 2)  # (batch_size, height, n_timesteps)
+        # x = x.transpose(1, 3)  # (batch_size, n_timesteps, height, n_channels)
+        # x = self.channels_fc(x)  # (batch_size, n_timesteps, height, 1)
+        # x = x.squeeze(-1).transpose(1, 2)  # (batch_size, height, n_timesteps)
+        
+        x = x.transpose(1, 3).transpose(2, 3).flatten(2)  # (batch_size, n_timesteps, n_channels * height )
+        x = self.channels_fc(x)  # (batch_size, n_timesteps, height)
         logits = self.decoder(x)  # (batch_size, n_classes, n_timesteps)
 
         output = {"logits": logits}

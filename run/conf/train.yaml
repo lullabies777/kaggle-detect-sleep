@@ -14,8 +14,8 @@ defaults:
   - dir: local
   - model: Spec2DCNN
   - feature_extractor: CNNSpectrogram
-  - decoder: UNet1DDecoder
-  - encoder: UNet++
+  - decoder: TransformerDecoder
+  - encoder: UNet
   - split: fold_0
 
 seed: 42
@@ -23,10 +23,10 @@ exp_name: dummy
 duration: 5760 # duration * 5 = 秒数
 downsample_rate: 2
 upsample_rate: 1
-overlap_interval: 0
+overlap_interval: 768
 
 # training
-epoch: 50
+epoch: 100
 batch_size: 16
 num_workers: 16
 accelerator: auto
@@ -39,8 +39,8 @@ monitor_mode: max
 check_val_every_n_epoch: 1
 
 # Dataset
-offset: 10
-sigma: 10
+offset: 30
+sigma: 20
 bg_sampling_rate: 0.5
 
 # augmentation
@@ -54,8 +54,8 @@ augmentation:
 post_process:
   score_th: 0.02
   distance: 10
-  gap: 180
-  quantile: 0.9
+  gap: 120
+  quantile: 0.5
 
 # label
 labels:
@@ -79,7 +79,7 @@ features:
 
 # optimizer
 optimizer:
-  lr: 0.0005
+  lr: 6e-4
 
 # scheduler
 scheduler:

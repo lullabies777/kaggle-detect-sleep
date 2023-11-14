@@ -1,28 +1,28 @@
 program: run/train.py
-name: UNet++
+name: UNet_kernel_size
 metric:
-  name: val_score2
+  name: val_best_score
   goal: maximize
 
-method: bayes
+method: grid
 parameters:
-  optimizer.lr:
-    values: [1e-4, 2e-4, 4e-4, 6e-4, 8e-5, 1e-5]
-  offset:
-    values: [10, 30, 50]
-  sigma:
-    values: [3, 5, 10, 20]
-  duration:
-    values: [5760, 11520, 17280]
-  downsample_rate:
-    values: [2, 6, 12]
-
+  feature_extractor.kernel_sizes:
+    values: [[32,16,8,4,2], [32,16,4,2], [32,16,2]]
+  
 command:
 - ${env}
 - ${interpreter}
 - ${program}
 - ${args_no_hyphens}
+- decoder=TransformerDecoder
+- exp_name=UNet++_TRANS
+- overlap_interval=768
+- epoch=100
+- sigma=30
+- optimizer.lr=8e-5
+- batch_size=8
 - encoder=UNet++
-- exp_name=UNet++
-- loss.name=focal
-- loss.weight=10
+- accumulate_grad_batches=2
+- duration=11520
+- loss.weight=0
+- offset=30

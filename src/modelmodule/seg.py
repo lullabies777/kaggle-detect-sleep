@@ -109,7 +109,7 @@ class SegModel(LightningModule):
         preds = np.concatenate([x[2] for x in self.validation_step_outputs])
         losses = np.array([x[3] for x in self.validation_step_outputs])
         loss = losses.mean()
-
+        
         val_pred_df = post_process_for_seg(
             keys=keys,
             preds=preds[:, :, [1, 2]],
@@ -123,7 +123,7 @@ class SegModel(LightningModule):
             gap=self.cfg.post_process.gap,
             quantile=self.cfg.post_process.quantile,
         )
-                
+        
         score = event_detection_ap(self.val_event_df.to_pandas(), val_pred_df.to_pandas())
         self.log("val_score", score, on_step=False, on_epoch=True, logger=True, prog_bar=True)
         
@@ -140,7 +140,7 @@ class SegModel(LightningModule):
         #     print(f"Saved best model {self.__best_loss} -> {loss}")
         #     self.__best_loss = loss
         
-        if score2 < self.__best_score:
+        if score2 > self.__best_score:
             np.save("keys.npy", np.array(keys))
             np.save("labels.npy", labels)
             np.save("preds.npy", preds)
@@ -148,7 +148,8 @@ class SegModel(LightningModule):
             torch.save(self.model.state_dict(), "best_model.pth")
             print(f"Saved best model {self.__best_score} -> {score2}")
             self.__best_score = score2
-
+        self.log("val_best_score", self.__best_score, on_step=False, on_epoch=True, logger=True, prog_bar=True)
+        
         self.validation_step_outputs.clear()
 
     def configure_optimizers(self):

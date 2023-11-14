@@ -14,28 +14,25 @@ from tqdm import tqdm
 from src.datamodule.seg import TestDataset, load_chunk_features, nearest_valid_size
 from src.models.common import get_model
 from src.utils.common import trace
-from src.utils.post_process import post_process_for_seg
+from src.utils.post_process import post_process_for_seg, post_process_for_seg_v2
 
 
 def load_model(cfg: DictConfig) -> nn.Module:
-    num_timesteps = nearest_valid_size(int(cfg.duration * cfg.upsample_rate), cfg.downsample_rate)
+    config = torch.load(cfg.config_dir)
+    config.model.encoder_name='resnet34'
+    config.model.encoder_weights=None
+    num_timesteps = nearest_valid_size(int((config.duration + 2 * config.overlap_interval) * config.upsample_rate), config.downsample_rate)
     model = get_model(
-        cfg,
-        feature_dim=len(cfg.features),
-        n_classes=len(cfg.labels),
-        num_timesteps=num_timesteps // cfg.downsample_rate,
+        config,
+        feature_dim=len(config.features),
+        n_classes=len(config.labels),
+        num_timesteps = num_timesteps // config.downsample_rate,
     )
 
     # load weights
-    if cfg.weight is not None:
-        weight_path = (
-            Path(cfg.dir.model_dir)
-            / cfg.weight["exp_name"]
-            / cfg.weight["run_name"]
-            / "best_model.pth"
-        )
-        model.load_state_dict(torch.load(weight_path))
-        print('load weight from "{}"'.format(weight_path))
+    if cfg.weight_dir:
+        model.load_state_dict(torch.load(cfg.weight_dir))
+        print('load weight from "{}"'.format(cfg.weight_dir))
     return model
 
 
@@ -56,6 +53,7 @@ def get_test_dataloader(cfg: DictConfig) -> DataLoader:
         series_ids=series_ids,
         processed_dir=Path(cfg.dir.processed_dir),
         phase=cfg.phase,
+        cfg = cfg
     )
     test_dataset = TestDataset(cfg, chunk_features=chunk_features)
     test_dataloader = DataLoader(
@@ -96,18 +94,37 @@ def inference(
     return keys, preds  # type: ignore
 
 
+# def make_submission(
+#     keys: list[str], preds: np.ndarray, downsample_rate, score_th, distance
+# ) -> pl.DataFrame:
+#     sub_df = post_process_for_seg_v2(
+#         keys,
+#         preds[:, :, [1, 2]],  # type: ignore
+#         score_th=score_th,
+#         distance=distance,  # type: ignore
+#     )
+
+#     return sub_df
+
 def make_submission(
-    keys: list[str], preds: np.ndarray, downsample_rate, score_th, distance
+    keys: list[str], preds: np.ndarray, cfg
 ) -> pl.DataFrame:
-    sub_df = post_process_for_seg(
+    if cfg.post_process.version == 'v1':
+        sub_df = post_process_for_seg(
         keys,
         preds[:, :, [1, 2]],  # type: ignore
-        score_th=score_th,
-        distance=distance,  # type: ignore
+        score_th=cfg.post_process.score_th,
+        distance=cfg.post_process.distance,  # type: ignore
     )
+    else:
+        sub_df = post_process_for_seg_v2(
+            keys,
+            preds[:, :, [1, 2]],  # type: ignore
+            gap=cfg.post_process.gap,
+            quantile=cfg.post_process.quantile,
+        )
 
     return sub_df
-
 
 @hydra.main(config_path="conf", config_name="inference", version_base="1.2")
 def main(cfg: DictConfig):
@@ -126,12 +143,12 @@ def main(cfg: DictConfig):
         sub_df = make_submission(
             keys,
             preds,
-            downsample_rate=cfg.downsample_rate,
-            score_th=cfg.post_process.score_th,
-            distance=cfg.post_process.distance,
+            cfg
         )
+    
     sub_df.write_csv(Path(cfg.dir.sub_dir) / "submission.csv")
-
+    np.save(Path(cfg.dir.sub_dir) / f"keys_{cfg.suffix}.npy", keys)
+    np.save(Path(cfg.dir.sub_dir) / f"preds_{cfg.suffix}.npy", preds)
 
 if __name__ == "__main__":
     main()

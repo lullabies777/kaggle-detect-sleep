@@ -19,7 +19,7 @@ from src.datamodule.seg import SegDataModule
 from src.modelmodule.seg import SegModel
 from time import gmtime, strftime
 import argparse 
-
+import os
 import wandb
 
 logging.basicConfig(
@@ -34,20 +34,13 @@ def main(cfg: DictConfig):  # type: ignore
     # using simple format of showing time
     s = strftime("%a_%d_%b_%H_%M", gmtime())
                  
-    wandb.init(name=cfg.exp_name + "_" + s, project="child-mind-institute-detect-sleep-states")
-#     # init experiment logger
+    wandb.init(project="kaggle-sleep-sweep")
+    # init experiment logger
     pl_logger = WandbLogger(
-        name=cfg.exp_name + "_" + s,
-        project="child-mind-institute-detect-sleep-states",
+        project="kaggle-sleep-sweep",
     )
     pl_logger.log_hyperparams(cfg)
     
-    # with wandb.init(name=cfg.exp_name + "_" + s, project="child-mind-institute-detect-sleep-states", 
-    #                 config = omegaconf.OmegaConf.to_container(
-    #                                 cfg, resolve=True, throw_on_missing=True
-    #                 )
-    #     ) as run:
-    #     # init lightning model
     datamodule = SegDataModule(cfg)
     LOGGER.info("Set Up DataModule")
     model = SegModel(
@@ -66,7 +59,7 @@ def main(cfg: DictConfig):  # type: ignore
     progress_bar = RichProgressBar()
     model_summary = RichModelSummary(max_depth=2)
 
-    early_stop_callback = EarlyStopping(monitor="val_score2", patience=7, verbose=False, mode="max")
+    early_stop_callback = EarlyStopping(monitor="val_score2", patience=10, verbose=False, mode="max")
     
     trainer = Trainer(
         # env
@@ -90,9 +83,11 @@ def main(cfg: DictConfig):  # type: ignore
     )
 
     trainer.fit(model, datamodule=datamodule)
-
+    
+    print("best model path: ", checkpoint_cb.best_model_path)
+    
     # load best weights
-    model = model.load_from_checkpoint(
+    model = SegModel.load_from_checkpoint(
         checkpoint_cb.best_model_path,
         cfg=cfg,
         val_event_df=datamodule.valid_event_df,
@@ -100,10 +95,14 @@ def main(cfg: DictConfig):  # type: ignore
         num_classes=len(cfg.labels),
         duration=cfg.duration,
     )
-    weights_path = str("model_weights.pth")  # type: ignore
-    LOGGER.info(f"Extracting and saving best weights: {weights_path}")
-    torch.save(model.model.state_dict(), weights_path)
-
+    
+    save_path = os.path.join(cfg.dir.output_dir, "train", cfg.exp_name, "single", "/".join(checkpoint_cb.best_model_path.split('/')[:-2]), "model_weights.pth")
+    cfg_save_path = os.path.join(cfg.dir.output_dir, "train", cfg.exp_name, "single", "/".join(checkpoint_cb.best_model_path.split('/')[:-2]), "cfg.pkl")
+    # weights_path = str("model_weights.pth")  # type: ignore
+    LOGGER.info(f"Extracting and saving best weights: {save_path}")
+    torch.save(model.model.state_dict(), save_path)
+    torch.save(cfg, cfg_save_path)
+    wandb.finish()
     return
 
     

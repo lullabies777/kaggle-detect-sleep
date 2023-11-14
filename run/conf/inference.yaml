@@ -15,6 +15,7 @@ defaults:
   - model: Spec2DCNN
   - feature_extractor: CNNSpectrogram
   - decoder: UNet1DDecoder
+  - encoder: UNet++
 
 exp_name: dummy
 phase: test
@@ -23,12 +24,16 @@ weight:
   run_name: single
 
 seed: 42
-duration: 5760 # durationは32の倍数
+duration: 11520 # durationは32の倍数
 downsample_rate: 2 # durationをdownsample_rateで割った値がnum_framesになる
 upsample_rate: 1
-batch_size: 32
+batch_size: 16
 num_workers: 2
 use_amp: true
+overlap_interval: 768
+weight_dir: ./
+config_dir: ./
+suffix: 0
 
 # augmentation
 augmentation:
@@ -41,7 +46,10 @@ augmentation:
 post_process:
   score_th: 0.02
   distance: 10
-
+  gap: 180
+  quantile: 0.9
+  version: v2
+  
 # label
 labels:
   - "awake"
@@ -52,5 +60,19 @@ labels:
 features:
   - "anglez"
   - "enmo"
+  # - "step"
+  # - "month_sin"
+  # - "month_cos"
   - "hour_sin"
   - "hour_cos"
+  # - "minute_sin"
+  # - "minute_cos"
+  # - "anglez_sin"
+  # - "anglez_cos"
+
+# criterion
+loss:
+  name: "bce"
+  alpha: 1.0
+  gamma: 2.0
+  weight: 0

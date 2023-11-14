@@ -1,0 +1,26 @@
+program: run/train.py
+name: UNet++_11520
+metric:
+  name: val_score2
+  goal: maximize
+
+method: bayes
+parameters:
+  sigma:
+    values: [15, 20, 30]
+  loss.weight:
+    values: [0, 1, 2]
+    
+command:
+- ${env}
+- ${interpreter}
+- ${program}
+- ${args_no_hyphens}
+- encoder=UNet++
+- exp_name=UNet++_TRANS
+- overlap_interval=768
+- duration=11520
+- epoch=100
+- optimizer.lr=6e-4
+- offset=30
+- sigma=20
