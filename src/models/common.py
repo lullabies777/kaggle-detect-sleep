@@ -152,6 +152,7 @@ def get_model(cfg: DictConfig, feature_dim: int, n_classes: int, num_timesteps: 
         model = Spec1D(
             feature_extractor=feature_extractor,
             decoder=decoder,
+            cfg = cfg,
             mixup_alpha=cfg.augmentation.mixup_alpha,
             cutmix_alpha=cfg.augmentation.cutmix_alpha,
         )

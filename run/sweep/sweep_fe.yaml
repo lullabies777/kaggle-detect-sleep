@@ -1,19 +1,19 @@
 program: run/train.py
-name: UNet++_decoder
+name: UNet++_fe
 metric:
   name: val_best_score
   goal: maximize
 
 method: grid
 parameters:
-  decoder:
-    values: ['TransformerDecoder', 'LSTMDecoder']
+  feature_extractor.base_filters:
+    values: [64, 128, 256]
 command:
 - ${env}
 - ${interpreter}
 - ${program}
 - ${args_no_hyphens}
-- exp_name=UNet++_decoder
+- exp_name=UNet++_fe
 - overlap_interval=768
 - epoch=100
 - sigma=30

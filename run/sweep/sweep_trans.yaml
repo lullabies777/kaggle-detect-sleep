@@ -1,20 +1,25 @@
 program: run/train.py
-name: UNet++_decoder
+name: UNet++_trans
 metric:
   name: val_best_score
   goal: maximize
 
 method: grid
 parameters:
-  decoder:
-    values: ['TransformerDecoder', 'LSTMDecoder']
+  decoder.hidden_size:
+    values: [128, 256]
+  decoder.num_layers:
+    values: [4, 6, 8]
+  decoder.heads:
+    values: [4, 8]
 command:
 - ${env}
 - ${interpreter}
 - ${program}
 - ${args_no_hyphens}
-- exp_name=UNet++_decoder
+- exp_name=UNet++_trans
 - overlap_interval=768
+- decoder=TransformerDecoder
 - epoch=100
 - sigma=30
 - batch_size=8

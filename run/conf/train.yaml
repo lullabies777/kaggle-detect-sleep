@@ -55,7 +55,7 @@ post_process:
   score_th: 0.02
   distance: 10
   gap: 120
-  quantile: 0.5
+  quantile: 0.7
 
 # label
 labels:

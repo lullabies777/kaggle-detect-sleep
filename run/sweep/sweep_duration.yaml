@@ -1,26 +1,25 @@
 program: run/train.py
-name: UNet++_decoder
+name: UNet++_duration
 metric:
   name: val_best_score
   goal: maximize
 
 method: grid
 parameters:
-  decoder:
-    values: ['TransformerDecoder', 'LSTMDecoder']
+  duration:
+    values: [11520, 17280]
 command:
 - ${env}
 - ${interpreter}
 - ${program}
 - ${args_no_hyphens}
-- exp_name=UNet++_decoder
+- exp_name=UNet++_duration
 - overlap_interval=768
 - epoch=100
 - sigma=30
 - batch_size=8
 - encoder=UNet++
 - accumulate_grad_batches=2
-- duration=11520
 - loss.weight=1
 - offset=30
 - feature_extractor.kernel_sizes= [32,16,4,2]

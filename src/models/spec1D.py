@@ -5,6 +5,7 @@ import torch.nn as nn
 
 from src.augmentation.cutmix import Cutmix
 from src.augmentation.mixup import Mixup
+from src.models.losses import get_loss
 
 
 class Spec1D(nn.Module):
@@ -40,6 +41,7 @@ class Spec1D(nn.Module):
         Returns:
             dict[str, torch.Tensor]: logits (batch_size, n_timesteps, n_classes)
         """
+
         x = self.feature_extractor(x)  # (batch_size, n_channels, height, n_timesteps)
 
         if do_mixup and labels is not None:
@@ -53,12 +55,35 @@ class Spec1D(nn.Module):
         # x = x.squeeze(-1).transpose(1, 2)  # (batch_size, height, n_timesteps)
         
         x = x.transpose(1, 3).transpose(2, 3).flatten(2)  # (batch_size, n_timesteps, n_channels * height )
+
         x = self.channels_fc(x)  # (batch_size, n_timesteps, height)
-        logits = self.decoder(x)  # (batch_size, n_classes, n_timesteps)
+
+        logits = self.decoder(x.transpose(-1,-2))  # (batch_size, n_classes, n_timesteps)
+        
+        # reduce overlap_interval 
+        logits = logits[:, (self.cfg.overlap_interval // self.cfg.downsample_rate) : logits.shape[1] - (self.cfg.overlap_interval // self.cfg.downsample_rate), :]
 
         output = {"logits": logits}
         if labels is not None:
-            loss = self.loss_fn(logits, labels)
-            output["loss"] = loss
+            assert logits.shape == labels.shape, f"logits shape: {logits.shape}, labels shape: {labels.shape}"
+
+            weight = labels.clone() * self.cfg.loss.weight 
+            weight += 1.0
+
+            if self.cfg.loss.name == "kl":
+                # labels = labels / labels.sum(dim = -1, keepdim = True)
+                labels = labels.softmax(dim = -1)
+                # logits = logits.sigmoid()
+                # logits = logits / logits.sum(dim = -1, keepdim = True)
+                logits = logits.softmax(dim = -1)
+
+                loss = self.loss_fn(logits.log(), labels)
+
+            else:
+                loss = self.loss_fn(logits, labels)
+
+            loss = loss * weight 
+
+            output["loss"] = loss.mean()
 
         return output

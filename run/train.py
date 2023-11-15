@@ -59,7 +59,7 @@ def main(cfg: DictConfig):  # type: ignore
     progress_bar = RichProgressBar()
     model_summary = RichModelSummary(max_depth=2)
 
-    early_stop_callback = EarlyStopping(monitor="val_score2", patience=10, verbose=False, mode="max")
+    early_stop_callback = EarlyStopping(monitor="val_score2", patience=100, verbose=False, mode="max")
     
     trainer = Trainer(
         # env
@@ -79,7 +79,8 @@ def main(cfg: DictConfig):  # type: ignore
         num_sanity_val_steps=0,
         log_every_n_steps=int(len(datamodule.train_dataloader()) * 0.1),
         sync_batchnorm=True,
-        check_val_every_n_epoch=cfg.check_val_every_n_epoch,
+        val_check_interval=0.2,
+        # check_val_every_n_epoch=cfg.check_val_every_n_epoch,
     )
 
     trainer.fit(model, datamodule=datamodule)
