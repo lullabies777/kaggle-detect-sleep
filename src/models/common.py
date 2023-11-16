@@ -16,14 +16,15 @@ from src.models.feature_extractor.PrecFeatureExtractor import PrecFeatureExtract
 from src.models.encoder.ContextDetection import ContextDetection
 from src.models.spec1D import Spec1D
 from src.models.spec2Dcnn import Spec2DCNN
+from src.models.PrecTime import PrecTime
 
 import segmentation_models_pytorch as smp
 
 FEATURE_EXTRACTORS = Union[
-    CNNSpectrogram, PANNsFeatureExtractor, LSTMFeatureExtractor, SpecFeatureExtractor
+    CNNSpectrogram, PANNsFeatureExtractor, LSTMFeatureExtractor, SpecFeatureExtractor, PrecFeatureExtractor
 ]
-DECODERS = Union[UNet1DDecoder, LSTMDecoder, TransformerDecoder, MLPDecoder]
-MODELS = Union[Spec1D, Spec2DCNN]
+DECODERS = Union[UNet1DDecoder, LSTMDecoder, TransformerDecoder, MLPDecoder, PredictionRefinement]
+MODELS = Union[Spec1D, Spec2DCNN, PrecTime]
 
 
 
@@ -73,7 +74,7 @@ def get_feature_extractor(
         )
     elif cfg.feature_extractor.name == "PrecFeatureExtractor":
         feature_extractor = PrecFeatureExtractor(
-            in_channels=feature_dim,
+            input_channels=feature_dim,
             hidden_channels=cfg.feature_extractor.hidden_channels,
             kernel_size=cfg.feature_extractor.kernel_size,
             padding=cfg.feature_extractor.padding,
@@ -106,6 +107,8 @@ def get_encoder(cfg: DictConfig, feature_extractor: FEATURE_EXTRACTORS):
             hidden_size= cfg.encoder.hidden_size,
             num_layers= cfg.encoder.num_layers,
             bidirectional= cfg.encoder.bidirectional,
+            sequence_length= cfg.sequence_length,
+            chunks= cfg.chunks
         )
     else:
         raise ValueError(f"Invalid encoder name: {cfg.encoder.name}")
@@ -190,9 +193,16 @@ def get_model(cfg: DictConfig, feature_dim: int, n_classes: int, num_timesteps: 
     elif cfg.model.name == "PrecTime":
         feature_extractor = get_feature_extractor(cfg, feature_dim, num_timesteps)
         encoder = get_encoder(cfg, feature_extractor)
-        decoder = get_decoder(cfg, feature_extractor.height, n_classes, num_timesteps)
-        
+        decoder = get_decoder(cfg, None, n_classes, num_timesteps)
+        model = PrecTime(
+            feature_extractor=feature_extractor,
+            encoder=encoder,
+            decoder=decoder,
+            cfg = cfg,
+            mixup_alpha=cfg.augmentation.mixup_alpha,
+            cutmix_alpha=cfg.augmentation.cutmix_alpha,
+        )
+
     else:
         raise NotImplementedError
-
     return model

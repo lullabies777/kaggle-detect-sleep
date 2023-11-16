@@ -8,7 +8,11 @@
 - [ ] More features
 - [ ] Feature embedding
 - [x] ~~Wandb sweep~~
-- [ ] scores on val
+- [x] scores on val
+- [ ] PrecTime
+  - [x] Model
+  - [ ] /src/models/PrecTime.py 里面Forward 算loss
+
 
 # Use Wandb sweep
 - If needed, modify `sweep.yaml` first.

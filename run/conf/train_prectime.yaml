@@ -1,0 +1,97 @@
+# ---------- Overriding hydra default configs ----------
+hydra:
+  job:
+    name: train
+    chdir: true
+  run:
+    dir: ${dir.output_dir}/${hydra.job.name}/${exp_name}/single
+  sweep:
+    dir: ${dir.output_dir}/${hydra.job.name}/${exp_name}
+    subdir: run${hydra.job.num}
+
+defaults:
+  - _self_
+  - dir: local
+  - model: PrecTime
+  - feature_extractor: PrecFeatureExtractor
+  - decoder: PredictionRefinement
+  - encoder: ContextDetection
+  - split: fold_0
+
+seed: 42
+exp_name: dummy
+duration: 5760 # duration * 5 = 秒数
+downsample_rate: 2
+upsample_rate: 1
+overlap_interval: 768
+
+#For model
+sequence_length: 720
+chunks: 4
+
+# training
+epoch: 100
+batch_size: 16
+num_workers: 16
+accelerator: auto
+use_amp: true
+debug: false
+gradient_clip_val: 1.0
+accumulate_grad_batches: 1
+monitor: val_score2
+monitor_mode: max
+check_val_every_n_epoch: 1
+
+# Dataset
+offset: 30
+sigma: 20
+bg_sampling_rate: 0.5
+
+# augmentation
+augmentation:
+  mixup_prob: 0.0
+  mixup_alpha: 0.4
+  cutmix_prob: 0.0
+  cutmix_alpha: 0.4
+  
+# post_process
+post_process:
+  score_th: 0.02
+  distance: 10
+  gap: 120
+  quantile: 0.7
+
+# label
+labels:
+  - "awake"
+  - "event_onset"
+  - "event_wakeup"
+
+# feature
+features:
+  - "anglez"
+  - "enmo"
+  # - "step"
+  # - "month_sin"
+  # - "month_cos"
+  - "hour_sin"
+  - "hour_cos"
+  # - "minute_sin"
+  # - "minute_cos"
+  # - "anglez_sin"
+  # - "anglez_cos"
+
+# optimizer
+optimizer:
+  lr: 6e-4
+
+# scheduler
+scheduler:
+  num_warmup_steps: 0
+  
+# criterion
+loss:
+  name: "bce"
+  alpha: 1.0
+  gamma: 2.0
+  weight: 0
