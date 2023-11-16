@@ -1,0 +1,10 @@
+name: PredictionRefinement
+in_channels: [512,128]
+out_channels: [128,128]
+kernel_size: 5
+padding: [2,2]
+stride: 1
+dilation: 1
+if_maxpool: [False,False]
+if_dropout: [False,True]
+mode: 'nearest'

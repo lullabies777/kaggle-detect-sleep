@@ -7,6 +7,7 @@ from src.models.decoder.lstmdecoder import LSTMDecoder
 from src.models.decoder.mlpdecoder import MLPDecoder
 from src.models.decoder.transformerdecoder import TransformerDecoder
 from src.models.decoder.unet1ddecoder import UNet1DDecoder
+from src.models.decoder.PredictionRefinement import PredictionRefinement
 from src.models.feature_extractor.cnn import CNNSpectrogram
 from src.models.feature_extractor.lstm import LSTMFeatureExtractor
 from src.models.feature_extractor.panns import PANNsFeatureExtractor
@@ -145,7 +146,17 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
     elif cfg.decoder.name == "MLPDecoder":
         decoder = MLPDecoder(n_channels=n_channels, n_classes=n_classes)
     elif cfg.decoder.name == 'PredictionRefinement':
-        pass
+        decoder = PredictionRefinement(
+            in_channels= cfg.decoder.in_channels,
+            out_channels= cfg.decoder.out_channels,
+            kernel_size= cfg.decoder.kernel_size,
+            padding= cfg.decoder.padding,
+            stride= cfg.decoder.stride,
+            dilation= cfg.decoder.dilation,
+            if_maxpool= cfg.decoder.if_maxpool,
+            if_dropout= cfg.decoder.if_dropout,
+            mode= cfg.decoder.mode
+        )
 
     else:
         raise ValueError(f"Invalid decoder name: {cfg.decoder.name}")
