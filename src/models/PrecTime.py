@@ -64,8 +64,9 @@ class PrecTime(nn.Module):
         print("The shape after combining Ui and Di:", combine_ui_di.shape)
 
         final_output = self.decoder(combine_ui_di)
+        print("The shape after prediction refinement:", final_output.shape)
         final_output = self.fc_final(final_output.permute(0, 2, 1))
-
+        print("The final shape after fc:", final_output.shape)
         return final_output
 
         
