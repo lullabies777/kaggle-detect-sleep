@@ -1,4 +1,4 @@
-name: RNN
+name: ContextDetection
 input_size: [64,256]
 hidden_size: [128,128]
 num_layers: [2,2]

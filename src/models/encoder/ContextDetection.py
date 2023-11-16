@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class RNN(nn.Module):
+class ContextDetection(nn.Module):
     '''
     中间的rnn层
     '''
