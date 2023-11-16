@@ -188,7 +188,10 @@ def get_model(cfg: DictConfig, feature_dim: int, n_classes: int, num_timesteps: 
             cutmix_alpha=cfg.augmentation.cutmix_alpha,
         )
     elif cfg.model.name == "PrecTime":
-        pass
+        feature_extractor = get_feature_extractor(cfg, feature_dim, num_timesteps)
+        encoder = get_encoder(cfg, feature_extractor)
+        decoder = get_decoder(cfg, feature_extractor.height, n_classes, num_timesteps)
+        
     else:
         raise NotImplementedError
 
