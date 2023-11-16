@@ -11,6 +11,7 @@ from src.models.feature_extractor.cnn import CNNSpectrogram
 from src.models.feature_extractor.lstm import LSTMFeatureExtractor
 from src.models.feature_extractor.panns import PANNsFeatureExtractor
 from src.models.feature_extractor.spectrogram import SpecFeatureExtractor
+from src.models.feature_extractor.PrecFeatureExtractor import PrecFeatureExtractor
 from src.models.spec1D import Spec1D
 from src.models.spec2Dcnn import Spec2DCNN
 
@@ -69,7 +70,14 @@ def get_feature_extractor(
             out_size=num_timesteps,
         )
     elif cfg.feature_extractor.name == "PrecFeatureExtractor":
-        pass
+        feature_extractor = PrecFeatureExtractor(
+            in_channels=feature_dim,
+            hidden_channels=cfg.feature_extractor.hidden_channels,
+            kernel_size=cfg.feature_extractor.kernel_size,
+            padding=cfg.feature_extractor.padding,
+            stride=cfg.feature_extractor.stride,
+            dilation=cfg.feature_extractor.dilation
+        )
     else:
         raise ValueError(f"Invalid feature extractor name: {cfg.feature_extractor.name}")
 
