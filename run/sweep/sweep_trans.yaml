@@ -20,7 +20,7 @@ command:
 - exp_name=UNet++_trans
 - overlap_interval=768
 - decoder=TransformerDecoder
-- epoch=100
+- epoch=1
 - sigma=30
 - batch_size=8
 - encoder=UNet++

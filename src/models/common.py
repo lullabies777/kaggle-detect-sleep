@@ -68,11 +68,34 @@ def get_feature_extractor(
             win_length=cfg.feature_extractor.win_length,
             out_size=num_timesteps,
         )
+    elif cfg.feature_extractor.name == "PrecFeatureExtractor":
+        pass
     else:
         raise ValueError(f"Invalid feature extractor name: {cfg.feature_extractor.name}")
 
     return feature_extractor
 
+def get_encoder(cfg: DictConfig, feature_extractor: FEATURE_EXTRACTORS):
+    if cfg.encoder.name == 'UNet':
+        encoder = smp.Unet(
+            encoder_name=cfg.model.encoder_name,
+            encoder_weights=cfg.model.encoder_weights,
+            in_channels=feature_extractor.out_chans,
+            classes=1,
+        )
+    elif cfg.encoder.name == 'UNet++':
+        encoder = smp.UnetPlusPlus(
+            encoder_name=cfg.model.encoder_name,
+            encoder_weights=cfg.model.encoder_weights,
+            in_channels=feature_extractor.out_chans,
+            classes=1,
+        )
+    elif cfg.encoder.name == 'RNN':
+        pass
+    else:
+        raise ValueError(f"Invalid encoder name: {cfg.encoder.name}")
+    
+    return encoder
 
 def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps: int) -> DECODERS:
     decoder: DECODERS
@@ -107,30 +130,13 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
         )
     elif cfg.decoder.name == "MLPDecoder":
         decoder = MLPDecoder(n_channels=n_channels, n_classes=n_classes)
+    elif cfg.decoder.name == 'PredictionRefinement':
+        pass
+
     else:
         raise ValueError(f"Invalid decoder name: {cfg.decoder.name}")
 
     return decoder
-
-def get_encoder(cfg: DictConfig, feature_extractor: FEATURE_EXTRACTORS):
-    if cfg.encoder.name == 'UNet':
-        encoder = smp.Unet(
-            encoder_name=cfg.model.encoder_name,
-            encoder_weights=cfg.model.encoder_weights,
-            in_channels=feature_extractor.out_chans,
-            classes=1,
-        )
-    elif cfg.encoder.name == 'UNet++':
-        encoder = smp.UnetPlusPlus(
-            encoder_name=cfg.model.encoder_name,
-            encoder_weights=cfg.model.encoder_weights,
-            in_channels=feature_extractor.out_chans,
-            classes=1,
-        )
-    else:
-        raise ValueError(f"Invalid encoder name: {cfg.encoder.name}")
-    
-    return encoder
 
 def get_model(cfg: DictConfig, feature_dim: int, n_classes: int, num_timesteps: int) -> MODELS:
     model: MODELS
@@ -156,6 +162,8 @@ def get_model(cfg: DictConfig, feature_dim: int, n_classes: int, num_timesteps: 
             mixup_alpha=cfg.augmentation.mixup_alpha,
             cutmix_alpha=cfg.augmentation.cutmix_alpha,
         )
+    elif cfg.model.name == "PrecTime":
+        pass
     else:
         raise NotImplementedError
 

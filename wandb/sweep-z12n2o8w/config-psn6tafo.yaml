@@ -1,0 +1,8 @@
+wandb_version: 1
+
+decoder.hidden_size:
+  value: 128
+decoder.nhead:
+  value: 8
+decoder.num_layers:
+  value: 8
