@@ -5,3 +5,5 @@ kernel_size: 5
 padding: 2
 stride: 1
 dilation: 1
+fe1_layers: 4
+fe2_layers: 4

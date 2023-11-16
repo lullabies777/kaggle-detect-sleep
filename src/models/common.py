@@ -12,6 +12,7 @@ from src.models.feature_extractor.lstm import LSTMFeatureExtractor
 from src.models.feature_extractor.panns import PANNsFeatureExtractor
 from src.models.feature_extractor.spectrogram import SpecFeatureExtractor
 from src.models.feature_extractor.PrecFeatureExtractor import PrecFeatureExtractor
+from src.models.encoder.rnn import RNN
 from src.models.spec1D import Spec1D
 from src.models.spec2Dcnn import Spec2DCNN
 
