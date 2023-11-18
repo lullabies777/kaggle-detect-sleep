@@ -149,6 +149,8 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
     elif cfg.decoder.name == "MLPDecoder":
         decoder = MLPDecoder(n_channels=n_channels, n_classes=n_classes)
     elif cfg.decoder.name == 'PredictionRefinement':
+        #cfg.decoder.in_channels[0] = cfg.feature_extractor.hidden_channels * 6
+        print(cfg.decoder.in_channels)
         decoder = PredictionRefinement(
             in_channels= cfg.decoder.in_channels,
             out_channels= cfg.decoder.out_channels,

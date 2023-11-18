@@ -40,10 +40,11 @@ class ContextDetection(nn.Module):
             scale_factor=sequence_length // chunks // 2,
             mode='nearest'
         )
-        self.inter_fc = nn.Linear(in_features=256, out_features=3)
+        self.inter_fc = nn.Linear(in_features=context_detection[-1].hidden_size * 2, out_features=3)
     def forward(self, x: torch.Tensor):
         for layer in self.context_detection:
             x, _ = layer(x)  #(output, (h_n, c_n))
+            #print(f"layer output is {x.shape}")
         # 有softmax的
         left = LeftBranch(upsample = self.inter_upsample, fc = self.inter_fc)
         output1 = left(x)

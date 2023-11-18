@@ -1,5 +1,5 @@
 name: ContextDetection
-input_size: [64,256]
-hidden_size: [128,128]
+input_size: [64,200]
+hidden_size: [100,128]
 num_layers: [2,2]
 bidirectional: [True,True]

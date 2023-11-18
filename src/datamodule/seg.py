@@ -172,7 +172,7 @@ class TrainDataset(Dataset):
         self.num_features = len(cfg.features)
         self.upsampled_num_frames = nearest_valid_size(
             int((self.cfg.duration + 2 * cfg.overlap_interval) * self.cfg.upsample_rate), self.cfg.downsample_rate
-        )
+        ) # 5760 + 2 * 768 = 7296
 
     def __len__(self):
         return len(self.event_df)

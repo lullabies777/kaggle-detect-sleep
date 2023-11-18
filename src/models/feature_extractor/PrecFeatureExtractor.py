@@ -132,9 +132,9 @@ class PrecFeatureExtractor(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         features1 = self.feature_extraction_left(x)
-        print("The output shape from left feature extraction:", features1.shape)
+        #print("The output shape from left feature extraction:", features1.shape)
         features2 = self.feature_extraction_right(x)
-        print("The output shape from right feature extraction:", features2.shape)
+        #print("The output shape from right feature extraction:", features2.shape)
         features_combined = torch.cat((features1, features2), dim=1)
         return features_combined
 

@@ -109,7 +109,8 @@ class SegModel_prectime(LightningModule):
         preds = np.concatenate([x[2] for x in self.validation_step_outputs])
         losses = np.array([x[3] for x in self.validation_step_outputs])
         loss = losses.mean()
-        
+        #print(f'preds is {preds}')
+        #print(f"labels is {labels}")
         val_pred_df = post_process_for_seg(
             keys=keys,
             preds=preds[:, :, [1, 2]],
