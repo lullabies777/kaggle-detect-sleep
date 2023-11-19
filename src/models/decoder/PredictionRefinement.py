@@ -37,6 +37,7 @@ class PredictionRefinement(nn.Module):
         dilation: int,
         if_maxpool: list[bool],
         if_dropout: list[bool],
+        scale_factor: int,
         mode: str
     ):
         super(PredictionRefinement, self).__init__()
@@ -51,7 +52,7 @@ class PredictionRefinement(nn.Module):
                 maxpool=if_maxpool[0],
                 dropout=if_dropout[1]
             ),
-            nn.Upsample(scale_factor=2, mode=mode),
+            nn.Upsample(scale_factor=scale_factor, mode=mode),
             conv1d_block(
                 in_channels=in_channels[1],
                 out_channels=out_channels[1],

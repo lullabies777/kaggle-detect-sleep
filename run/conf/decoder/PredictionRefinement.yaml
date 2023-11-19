@@ -7,4 +7,5 @@ stride: 1
 dilation: 1
 if_maxpool: [False,False]
 if_dropout: [False,True]
+scale_factor : 2
 mode: 'nearest'

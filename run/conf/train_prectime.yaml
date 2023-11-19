@@ -20,18 +20,19 @@ defaults:
 
 seed: 42
 exp_name: dummy
-duration: 11520 # duration * 5 = 秒数
+duration: 7200 # duration * 5 = 秒数
 downsample_rate: 1
 upsample_rate: 1
-overlap_interval: 768
+overlap_interval: 720
 
 #For model
 #sequence_length : duration + 2 * overlap_interval
+# 需要满足： (duration + 2 * overlap_interval) / chunks 是偶数
 sequence_length: 0
-chunks: 16
+chunks: 160
 
 # training
-epoch: 100
+epoch: 150
 batch_size: 16
 num_workers: 16
 accelerator: auto
@@ -77,14 +78,14 @@ features:
   # - "month_cos"
   - "hour_sin"
   - "hour_cos"
-  - "minute_sin"
-  - "minute_cos"
-  - "anglez_sin"
-  - "anglez_cos"
+  #- "minute_sin"
+  #- "minute_cos"
+  #- "anglez_sin"
+  #- "anglez_cos"
 
 # optimizer
 optimizer:
-  lr: 1e-3
+  lr: 1e-4
 
 # scheduler
 scheduler:

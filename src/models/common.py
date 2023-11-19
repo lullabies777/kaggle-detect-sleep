@@ -160,6 +160,7 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
             dilation= cfg.decoder.dilation,
             if_maxpool= cfg.decoder.if_maxpool,
             if_dropout= cfg.decoder.if_dropout,
+            scale_factor= cfg.decoder.scale_factor,
             mode= cfg.decoder.mode
         )
 

@@ -48,7 +48,11 @@ class PrecTime(nn.Module):
         origin_x = x
         #print(f"input shape is: {origin_x.shape}")
         if x.shape[-1] % self.cfg.chunks != 0:
-            print(ValueError(f"Sequence_Length Should be Divided by Num_Chunks, Sequence_Length is {x.shape[-1]}"))
+            raise ValueError(f"Sequence_Length Should be Divided by Num_Chunks, Sequence_Length is {x.shape[-1]}")
+            
+        if (x.shape[-1] / self.cfg.chunks) % 2 != 0:
+            raise ValueError(f"Sequence_Length Divided by Num_Chunks should be 2 times X, "
+                     f"Sequence_Length Divided by Num_Chunks is {x.shape[-1]} / {self.cfg.chunks} = {x.shape[-1] / self.cfg.chunks}")
 
         x = x.transpose(0, 1).reshape(
             x.shape[1], -1, x.shape[2] // self.cfg.chunks
