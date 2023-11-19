@@ -89,7 +89,7 @@ def main(cfg: DictConfig):  # type: ignore
     print("best model path: ", checkpoint_cb.best_model_path)
     
     # load best weights
-    model = SegDataModule.load_from_checkpoint(
+    model = SegModel_prectime.load_from_checkpoint(
         checkpoint_cb.best_model_path,
         cfg=cfg,
         val_event_df=datamodule.valid_event_df,
