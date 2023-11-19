@@ -22,7 +22,7 @@ class PrecTime(nn.Module):
         self.encoder = encoder
         self.decoder = decoder
         self.cfg = cfg
-        self.fc1 = nn.Linear(self.cfg.feature_extractor.hidden_channels * 2 *(self.cfg.sequence_length // self.cfg.chunks // 2), 64
+        self.fc1 = nn.Linear(self.cfg.feature_extractor.hidden_channels * 2 * (self.cfg.sequence_length // self.cfg.chunks // 2), 64
         )
 
         self.inter_upsample = nn.Upsample(
@@ -49,11 +49,11 @@ class PrecTime(nn.Module):
         #print(f"input shape is: {origin_x.shape}")
         if x.shape[-1] % self.cfg.chunks != 0:
             print(ValueError(f"Sequence_Length Should be Divided by Num_Chunks, Sequence_Length is {x.shape[-1]}"))
-        x = x.reshape(
-            -1,
-            len(self.cfg.features),
-            x.shape[-1] // self.cfg.chunks
-        )
+
+        x = x.transpose(0, 1).reshape(
+            x.shape[1], -1, x.shape[2] // self.cfg.chunks
+        ).transpose(0, 1)
+
         #print("The shape put into feature extraction:", x.shape)
         features_combined = self.feature_extractor(x)
         #print("The shape after the flatten of concat output:", features_combined.shape)
@@ -65,7 +65,9 @@ class PrecTime(nn.Module):
         output1, di = self.encoder(features_combined_flat)
         #print(f"The first output is {output1.shape}")
 
-        ui = features_combined.reshape(origin_x.shape[0], features_combined.shape[1], -1)
+        ui = features_combined.transpose(0, 1).reshape(
+            features_combined.shape[1], origin_x.shape[0], -1
+        ).transpose(0, 1)
         #print("The shape after Reshaping Ui:", ui.shape)
         combine_ui_di = torch.cat([ui, di], dim=1)
         #print("The shape after combining Ui and Di:", combine_ui_di.shape)
