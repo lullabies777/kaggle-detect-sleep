@@ -10,27 +10,48 @@ class ContextDetection(nn.Module):
     '''
     def __init__(
         self,
-        input_size: list[int] ,
-        hidden_size: list[int],
+        fe_fc_dimension: int,
+        lstm_dimensions: list[int],
         num_layers: list[int],
         bidirectional: list[bool],
         sequence_length,
         chunks
     ):
         super(ContextDetection, self).__init__()
+        self.fe_fc_dimension = fe_fc_dimension
+        self.bidirectional = bidirectional
+        self.num_layers = num_layers
+        self.lstm_dimensions = lstm_dimensions
+        self.encoder_output_dimension = self.lstm_dimensions[-1] * 2
+        
+        if num_layers != len(lstm_dimensions):
+            print(f"num layers of lstm is {num_layers}")
+            print(f"lstm_dimensions of lstm is {lstm_dimensions}")
+            self.num_layers = len(self.lstm_dimensions)
+
+        
+
         context_detection = []
-        for index in range(len(input_size)):
-            tmp_input_size = input_size[index]
-            tmp_hidden_size = hidden_size[index]
-            tmp_num_layers = num_layers[index]
-            tmp_bidirectional = bidirectional[index]
-            tmp_layer = nn.LSTM(
-                input_size = tmp_input_size,
-                hidden_size = tmp_hidden_size,
-                num_layers = tmp_num_layers,
-                bidirectional = tmp_bidirectional,
-                batch_first=True)
-            context_detection.append(tmp_layer)
+        for i in range(self.num_layers):
+            if i == 0:
+                context_detection.extend([
+                    nn.LSTM(
+                        input_size=self.fe_fc_dimension,
+                        hidden_size=self.lstm_dimensions[i],
+                        num_layers=1,
+                        bidirectional=True
+                    )
+                ])
+
+            else:
+                context_detection.extend([
+                    nn.LSTM(
+                        input_size=self.lstm_dimensions[i - 1] * 2,
+                        hidden_size=self.lstm_dimensions[i],
+                        num_layers=1,
+                        bidirectional=True
+                    )
+                ])
         self.context_detection = nn.Sequential(*context_detection)
         self.inter_upsample = nn.Upsample(
             scale_factor=sequence_length // chunks,
@@ -40,7 +61,7 @@ class ContextDetection(nn.Module):
             scale_factor=sequence_length // chunks // 2,
             mode='nearest'
         )
-        self.inter_fc = nn.Linear(in_features=context_detection[-1].hidden_size * 2, out_features=3)
+        self.inter_fc = nn.Linear(in_features=self.encoder_output_dimension, out_features=3)
     def forward(self, x: torch.Tensor):
         for layer in self.context_detection:
             x, _ = layer(x)  #(output, (h_n, c_n))

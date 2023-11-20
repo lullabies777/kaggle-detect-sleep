@@ -110,8 +110,8 @@ def get_encoder(cfg: DictConfig, feature_extractor: FEATURE_EXTRACTORS):
         )
     elif cfg.encoder.name == 'ContextDetection':
         encoder = ContextDetection(
-            input_size= cfg.encoder.input_size,
-            hidden_size= cfg.encoder.hidden_size,
+            fe_fc_dimension= cfg.encoder.fe_fc_dimension,
+            lstm_dimensions= cfg.encoder.lstm_dimensions,
             num_layers= cfg.encoder.num_layers,
             bidirectional= cfg.encoder.bidirectional,
             sequence_length= cfg.sequence_length,
@@ -156,7 +156,7 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
     elif cfg.decoder.name == "MLPDecoder":
         decoder = MLPDecoder(n_channels=n_channels, n_classes=n_classes)
     elif cfg.decoder.name == 'PredictionRefinement':
-        #cfg.decoder.in_channels[0] = cfg.feature_extractor.hidden_channels * 6
+        cfg.decoder.in_channels = cfg.feature_extractor.left_hidden_channels[-1] + cfg.feature_extractor.right_hidden_channels[-1] + cfg.encoder.lstm_dimensions[-1] * 2
         print(cfg.decoder.in_channels)
         decoder = PredictionRefinement(
             in_channels= cfg.decoder.in_channels,

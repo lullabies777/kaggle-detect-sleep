@@ -24,7 +24,7 @@ class PrecTime(nn.Module):
         self.cfg = cfg
         self.fc_after_fe = nn.Linear(
             (self.cfg.feature_extractor.left_hidden_channels[-1] + self.cfg.feature_extractor.right_hidden_channels[-1]) *
-            (self.cfg.sequence_length // self.cfg.chunks // 2), self.cfg.encoder.input_size[0]
+            (self.cfg.sequence_length // self.cfg.chunks // 2), self.cfg.encoder.fe_fc_dimension
         )
 
         self.inter_upsample = nn.Upsample(
@@ -38,7 +38,7 @@ class PrecTime(nn.Module):
             mode='nearest'
         )
 
-        self.fc_final = nn.Linear(128, 3)
+        self.fc_final = nn.Linear(self.cfg.decoder.out_channels, self.cfg.num_classes)
         self.loss_fn = get_loss(cfg)
 
     def forward(

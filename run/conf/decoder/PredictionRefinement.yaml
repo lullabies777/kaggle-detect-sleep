@@ -1,10 +1,10 @@
 name: PredictionRefinement
-in_channels: [384,128]
-out_channels: [128,128]
+in_channels: 0 # auto calculate
+out_channels: 128
 kernel_size: 5
-padding: [2,2]
+padding: 0 # auto calculate
 stride: 1
-dilation: 1
+dilation: 6
 if_maxpool: [False,False]
 if_dropout: [False,True]
 scale_factor : 2

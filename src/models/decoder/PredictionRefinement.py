@@ -29,10 +29,10 @@ def conv1d_block(
 class PredictionRefinement(nn.Module):
     def __init__(
         self, 
-        in_channels: list[int],
-        out_channels: list[int],
+        in_channels: int,
+        out_channels: int,
         kernel_size: int,
-        padding: list[int],
+        padding: int,
         stride: int,
         dilation: int,
         if_maxpool: list[bool],
@@ -41,27 +41,35 @@ class PredictionRefinement(nn.Module):
         mode: str
     ):
         super(PredictionRefinement, self).__init__()
+
+        if dilation * (kernel_size - 1) % 2 != 0:
+            raise ValueError("Please re-input dilation, kernel_size!!!")
+        else:
+            padding = (dilation * (kernel_size - 1)) // 2
+
+
+
         self.prediction_refinement = nn.Sequential(
             conv1d_block(
-                in_channels=in_channels[0],
-                out_channels=out_channels[0],
+                in_channels=in_channels, 
+                out_channels=out_channels,
                 kernel_size=kernel_size,
-                padding=padding[0],
+                padding=padding,
                 stride=stride,
                 dilation=dilation,
-                maxpool=if_maxpool[0],
-                dropout=if_dropout[1]
+                maxpool=False,
+                dropout=False
             ),
-            nn.Upsample(scale_factor=scale_factor, mode=mode),
+            nn.Upsample(scale_factor=scale_factor, mode='nearest'),
             conv1d_block(
-                in_channels=in_channels[1],
-                out_channels=out_channels[1],
+                in_channels=out_channels,
+                out_channels=out_channels,
                 kernel_size=kernel_size,
-                padding=padding[1],
+                padding=padding,
                 stride=stride,
                 dilation=dilation,
-                maxpool=if_maxpool[1],
-                dropout=if_dropout[1]
+                maxpool=False,
+                dropout=True
             ),
             nn.Dropout(p=0.5)
         )

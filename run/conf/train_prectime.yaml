@@ -30,9 +30,10 @@ overlap_interval: 720
 # 需要满足： (duration + 2 * overlap_interval) / chunks 是偶数
 sequence_length: 0
 chunks: 80
+num_classes: 3
 
 # training
-epoch: 1
+epoch: 5
 batch_size: 16
 num_workers: 16
 accelerator: auto

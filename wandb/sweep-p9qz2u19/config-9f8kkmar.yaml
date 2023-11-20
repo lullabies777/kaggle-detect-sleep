@@ -1,0 +1,12 @@
+wandb_version: 1
+
+feature_extractor.fe1_layers:
+  value: 4
+feature_extractor.fe2_layers:
+  value: 4
+feature_extractor.left_hidden_channels:
+  value:
+  - 32
+  - 64
+  - 128
+  - 256

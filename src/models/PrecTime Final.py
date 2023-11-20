@@ -287,7 +287,7 @@ class PrecTime(nn.Module):
                 nhead=self.n_head,
                 num_encoder_layers=self.num_encoder_layers,
                 dim_feedforward=self.dim_feedforward,
-                dropout=self.dropout,
+                dropout=self.dropout,0
                 activation=self.activation
             )
 
