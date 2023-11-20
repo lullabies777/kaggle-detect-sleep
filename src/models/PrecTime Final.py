@@ -57,7 +57,8 @@ def transformer_encoder_model(
         nhead=nhead,
         dim_feedforward=dim_feedforward,
         dropout=dropout,
-        activation=activation
+        activation=activation,
+        batch_first=True
     )
     transformer_encoder = nn.TransformerEncoder(
         encoder_layer,
@@ -262,7 +263,8 @@ class PrecTime(nn.Module):
                             input_size=self.fe_fc_dimension,
                             hidden_size=self.lstm_dimensions[i],
                             num_layers=1,
-                            bidirectional=True
+                            bidirectional=True,
+                            batch_first=True
                         )
                     ])
 
@@ -272,7 +274,8 @@ class PrecTime(nn.Module):
                             input_size=self.lstm_dimensions[i - 1] * 2,
                             hidden_size=self.lstm_dimensions[i],
                             num_layers=1,
-                            bidirectional=True
+                            bidirectional=True,
+                            batch_first=True
                         )
                     ])
 
@@ -287,7 +290,7 @@ class PrecTime(nn.Module):
                 nhead=self.n_head,
                 num_encoder_layers=self.num_encoder_layers,
                 dim_feedforward=self.dim_feedforward,
-                dropout=self.dropout,0
+                dropout=self.dropout,
                 activation=self.activation
             )
 
@@ -412,6 +415,8 @@ class PrecTime(nn.Module):
         print("The shape after prediction refinement:", final_output.shape)
         final_output = self.fc_final(final_output.permute(0, 2, 1))
         print("The final shape after fc:", final_output.shape)
+
+        return output
 
 
 Model = PrecTime(
