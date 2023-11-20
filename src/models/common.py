@@ -84,9 +84,7 @@ def get_feature_extractor(
             left_fe_stride=cfg.feature_extractor.left_fe_stride,
             right_fe_stride=cfg.feature_extractor.right_fe_stride,
             left_fe_dilation=cfg.feature_extractor.left_fe_dilation,
-            right_fe_dilation=cfg.feature_extractor.right_fe_dilation,
-            fe1_layers=cfg.feature_extractor.fe1_layers,
-            fe2_layers=cfg.feature_extractor.fe2_layers
+            right_fe_dilation=cfg.feature_extractor.right_fe_dilation
         )
     else:
         raise ValueError(f"Invalid feature extractor name: {cfg.feature_extractor.name}")
@@ -113,7 +111,6 @@ def get_encoder(cfg: DictConfig, feature_extractor: FEATURE_EXTRACTORS):
             fe_fc_dimension= cfg.encoder.fe_fc_dimension,
             lstm_dimensions= cfg.encoder.lstm_dimensions,
             num_layers= cfg.encoder.num_layers,
-            bidirectional= cfg.encoder.bidirectional,
             sequence_length= cfg.sequence_length,
             chunks= cfg.chunks
         )
@@ -165,8 +162,6 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
             padding= cfg.decoder.padding,
             stride= cfg.decoder.stride,
             dilation= cfg.decoder.dilation,
-            if_maxpool= cfg.decoder.if_maxpool,
-            if_dropout= cfg.decoder.if_dropout,
             scale_factor= cfg.decoder.scale_factor,
             mode= cfg.decoder.mode
         )

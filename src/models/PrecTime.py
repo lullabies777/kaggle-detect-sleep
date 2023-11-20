@@ -62,8 +62,8 @@ class PrecTime(nn.Module):
 
         #print("The shape put into feature extraction:", x.shape)
         features_combined = self.feature_extractor(x)
-        #print("The shape after the flatten of concat output:", features_combined.shape)
-        features_combined_flat = features_combined.view(origin_x.shape[0], self.cfg.chunks, -1) # (batzh, chunks, flaten_features)
+        #print("The shape of concat output:", features_combined.shape)
+        features_combined_flat = features_combined.view(origin_x.shape[0], self.cfg.chunks,-1) # (batzh, chunks, flaten_features)
         #print("The shape after the flatten of concat output:",features_combined_flat.shape)
         
         features_combined_flat = self.fc_after_fe(features_combined_flat)

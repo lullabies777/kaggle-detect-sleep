@@ -13,13 +13,11 @@ class ContextDetection(nn.Module):
         fe_fc_dimension: int,
         lstm_dimensions: list[int],
         num_layers: list[int],
-        bidirectional: list[bool],
         sequence_length,
         chunks
     ):
         super(ContextDetection, self).__init__()
         self.fe_fc_dimension = fe_fc_dimension
-        self.bidirectional = bidirectional
         self.num_layers = num_layers
         self.lstm_dimensions = lstm_dimensions
         self.encoder_output_dimension = self.lstm_dimensions[-1] * 2
@@ -39,7 +37,8 @@ class ContextDetection(nn.Module):
                         input_size=self.fe_fc_dimension,
                         hidden_size=self.lstm_dimensions[i],
                         num_layers=1,
-                        bidirectional=True
+                        bidirectional=True,
+                        batch_first=True,
                     )
                 ])
 
@@ -49,7 +48,8 @@ class ContextDetection(nn.Module):
                         input_size=self.lstm_dimensions[i - 1] * 2,
                         hidden_size=self.lstm_dimensions[i],
                         num_layers=1,
-                        bidirectional=True
+                        bidirectional=True,
+                        batch_first=True
                     )
                 ])
         self.context_detection = nn.Sequential(*context_detection)
@@ -66,7 +66,6 @@ class ContextDetection(nn.Module):
         for layer in self.context_detection:
             x, _ = layer(x)  #(output, (h_n, c_n))
             #print(f"layer output is {x.shape}")
-        # 有softmax的
         left = LeftBranch(upsample = self.inter_upsample, fc = self.inter_fc)
         output1 = left(x)
 

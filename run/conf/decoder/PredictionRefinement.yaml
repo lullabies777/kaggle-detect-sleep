@@ -4,8 +4,6 @@ out_channels: 128
 kernel_size: 5
 padding: 0 # auto calculate
 stride: 1
-dilation: 6
-if_maxpool: [False,False]
-if_dropout: [False,True]
+dilation: 1
 scale_factor : 2
 mode: 'nearest'

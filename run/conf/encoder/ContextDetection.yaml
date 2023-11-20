@@ -1,5 +1,5 @@
 name: ContextDetection
 fe_fc_dimension: 64
-lstm_dimensions: [100,100]
-num_layers: 2
+lstm_dimensions: [100,128]
+num_layers: -1
 bidirectional: [True,True]

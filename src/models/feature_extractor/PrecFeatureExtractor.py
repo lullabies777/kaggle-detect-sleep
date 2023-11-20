@@ -46,9 +46,7 @@ class PrecFeatureExtractor(nn.Module):
         left_fe_stride: int,
         right_fe_stride: int,
         left_fe_dilation: int,
-        right_fe_dilation: int,
-        fe1_layers=4,
-        fe2_layers=4
+        right_fe_dilation: int
     ):
         super(PrecFeatureExtractor, self).__init__()
         self.input_channels = input_channels
@@ -69,29 +67,23 @@ class PrecFeatureExtractor(nn.Module):
         self.left_fe_dilation = left_fe_dilation
         self.right_fe_dilation = right_fe_dilation
 
-        self.fe1_layers = fe1_layers
-        self.fe2_layers = fe2_layers
-
-        
-        assert self.fe1_layers == len(self.left_hidden_channels)
-        assert self.fe2_layers == len(self.right_hidden_channels)
+        self.fe1_layers = len(self.left_hidden_channels)
+        self.fe2_layers = len(self.right_hidden_channels)
 
         #check padding
         if self.left_fe_dilation * (self.left_fe_kernel_size - 1) % 2 != 0:
             raise ValueError("Please re-input left dilation, kernel_size!!!")
         else:
-            self.left_fe_padding = (
-                self.left_fe_dilation * (self.left_fe_kernel_size - 1)) // 2
+            self.left_fe_padding = (self.left_fe_dilation * (self.left_fe_kernel_size - 1)) // 2
         
         if self.right_fe_dilation * (self.right_fe_kernel_size - 1) % 2 != 0:
             raise ValueError("Please re-input right dilation, kernel_size!!!")
         else:
-            self.right_fe_padding = (
-                self.right_fe_dilation * (self.right_fe_kernel_size - 1)) // 2
+            self.right_fe_padding = (self.right_fe_dilation * (self.right_fe_kernel_size - 1)) // 2
         
         # 左侧特征提取分支
         feature_extraction1_layer = []
-        feature_extraction1_layer.extend(
+        feature_extraction1_layer.extend([
             conv1d_block(
                 in_channels=self.input_channels,
                 out_channels=self.left_hidden_channels[0],
@@ -101,7 +93,7 @@ class PrecFeatureExtractor(nn.Module):
                 dilation=self.left_fe_dilation,
                 maxpool=True,
                 dropout=True
-            )
+            )]
         )
         for i in range(self.fe1_layers - 1): 
             feature_extraction1_layer.extend([
@@ -120,7 +112,7 @@ class PrecFeatureExtractor(nn.Module):
 
         # 右侧特征提取分支
         feature_extraction2_layer = []
-        feature_extraction2_layer.extend(
+        feature_extraction2_layer.extend([
             conv1d_block(
                 in_channels=self.input_channels,
                 out_channels=self.right_hidden_channels[0],
@@ -130,7 +122,7 @@ class PrecFeatureExtractor(nn.Module):
                 dilation=self.right_fe_dilation,
                 maxpool=True,
                 dropout=True
-            )
+            )]
         )
         for i in range(self.fe2_layers - 1):
             feature_extraction2_layer.extend([

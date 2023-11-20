@@ -35,8 +35,6 @@ class PredictionRefinement(nn.Module):
         padding: int,
         stride: int,
         dilation: int,
-        if_maxpool: list[bool],
-        if_dropout: list[bool],
         scale_factor: int,
         mode: str
     ):
@@ -60,7 +58,7 @@ class PredictionRefinement(nn.Module):
                 maxpool=False,
                 dropout=False
             ),
-            nn.Upsample(scale_factor=scale_factor, mode='nearest'),
+            nn.Upsample(scale_factor=scale_factor, mode=mode),
             conv1d_block(
                 in_channels=out_channels,
                 out_channels=out_channels,

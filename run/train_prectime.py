@@ -35,7 +35,7 @@ def main(cfg: DictConfig):  # type: ignore
     s = strftime("%a_%d_%b_%H_%M", gmtime())
                  
     wandb.init(project="kaggle-sleep-sweep")
-    # init experiment logger
+    #init experiment logger
     pl_logger = WandbLogger(
         project="kaggle-sleep-sweep",
     )
@@ -47,7 +47,8 @@ def main(cfg: DictConfig):  # type: ignore
         cfg, datamodule.valid_event_df, len(cfg.features), len(cfg.labels), cfg.duration
     )
     print(model)
-
+    # x = torch.rand((cfg.batch_size,len(cfg.features),cfg.sequence_length))
+    # print(model(x))
     # set callbacks
     checkpoint_cb = ModelCheckpoint(
         verbose=True,
@@ -109,6 +110,6 @@ def main(cfg: DictConfig):  # type: ignore
 
     
 
-
+# kill wandb: ps aux|grep wandb|grep -v grep | awk '{print $2}'|xargs kill -9
 if __name__ == "__main__":
     main()
