@@ -36,56 +36,82 @@ class PrecFeatureExtractor(nn.Module):
     '''
     def __init__(
         self,
-        input_channels,
-        hidden_channels,
-        kernel_size,
-        padding,
-        stride,
-        dilation,
+        input_channels: int,
+        left_hidden_channels: list[int],
+        right_hidden_channels: list[int],
+        left_fe_kernel_size: int,
+        right_fe_kernel_size: int,
+        left_fe_padding: int,
+        right_fe_padding: int,
+        left_fe_stride: int,
+        right_fe_stride: int,
+        left_fe_dilation: int,
+        right_fe_dilation: int,
         fe1_layers=4,
         fe2_layers=4
     ):
         super(PrecFeatureExtractor, self).__init__()
-
         self.input_channels = input_channels
-        self.hidden_channels = hidden_channels
-        self.kernel_size = kernel_size
-        self.padding = padding
-        self.stride = stride
-        self.dilation = dilation
+
+        self.left_hidden_channels = left_hidden_channels
+        self.right_hidden_channels = right_hidden_channels
+
+        self.left_fe_kernel_size = left_fe_kernel_size
+        self.right_fe_kernel_size = right_fe_kernel_size
+
+        self.left_fe_padding = left_fe_padding
+        self.right_fe_padding = right_fe_padding
+
+
+        self.left_fe_stride = left_fe_stride
+        self.right_fe_stride = right_fe_stride
+
+        self.left_fe_dilation = left_fe_dilation
+        self.right_fe_dilation = right_fe_dilation
+
         self.fe1_layers = fe1_layers
         self.fe2_layers = fe2_layers
+
+        
+        assert self.fe1_layers == len(self.left_hidden_channels)
+        assert self.fe2_layers == len(self.right_hidden_channels)
+
+        #check padding
+        if self.left_fe_dilation * (self.left_fe_kernel_size - 1) % 2 != 0:
+            raise ValueError("Please re-input left dilation, kernel_size!!!")
+        else:
+            self.left_fe_padding = (
+                self.left_fe_dilation * (self.left_fe_kernel_size - 1)) // 2
+        
+        if self.right_fe_dilation * (self.right_fe_kernel_size - 1) % 2 != 0:
+            raise ValueError("Please re-input right dilation, kernel_size!!!")
+        else:
+            self.right_fe_padding = (
+                self.right_fe_dilation * (self.right_fe_kernel_size - 1)) // 2
+        
         # 左侧特征提取分支
         feature_extraction1_layer = []
-        feature_extraction1_layer.extend([
+        feature_extraction1_layer.extend(
             conv1d_block(
                 in_channels=self.input_channels,
-                out_channels=self.hidden_channels,
-                kernel_size=self.kernel_size,
-                padding=self.padding,
-                stride=self.stride,
-                dilation=self.dilation
-            ),
-            conv1d_block(
-                in_channels=self.hidden_channels,
-                out_channels=self.hidden_channels,
-                kernel_size=self.kernel_size,
-                padding=self.padding,
-                stride=self.stride,
-                dilation=self.dilation,
+                out_channels=self.left_hidden_channels[0],
+                kernel_size=self.left_fe_kernel_size,
+                padding=self.left_fe_padding,
+                stride=self.left_fe_stride,
+                dilation=self.left_fe_dilation,
                 maxpool=True,
                 dropout=True
             )
-        ])
-        for i in range(self.fe1_layers):
+        )
+        for i in range(self.fe1_layers - 1): 
             feature_extraction1_layer.extend([
                 conv1d_block(
-                    in_channels=self.hidden_channels,
-                    out_channels=self.hidden_channels,
-                    kernel_size=self.kernel_size,
-                    padding=self.padding,
-                    stride=self.stride,
-                    dilation=self.dilation
+                    in_channels=self.left_hidden_channels[i],
+                    out_channels=self.left_hidden_channels[i + 1],
+                    kernel_size=self.left_fe_kernel_size,
+                    padding=self.left_fe_padding,
+                    stride=self.left_fe_stride,
+                    dilation=self.left_fe_dilation
                 )
             ])
         self.feature_extraction_left = nn.Sequential(
@@ -93,37 +119,28 @@ class PrecFeatureExtractor(nn.Module):
         )
 
         # 右侧特征提取分支
-        self.padding = 8
         feature_extraction2_layer = []
-        feature_extraction2_layer.extend([
+        feature_extraction2_layer.extend(
             conv1d_block(
                 in_channels=self.input_channels,
-                out_channels=self.hidden_channels,
-                kernel_size=self.kernel_size,
-                padding=self.padding,
-                stride=self.stride,
-                dilation=4
-            ),
-            conv1d_block(
-                in_channels=self.hidden_channels,
-                out_channels=self.hidden_channels,
-                kernel_size=self.kernel_size,
-                padding=self.padding,
-                stride=self.stride,
-                dilation=4,
+                out_channels=self.right_hidden_channels[0],
+                kernel_size=self.right_fe_kernel_size,
+                padding=self.right_fe_padding,
+                stride=self.right_fe_stride,
+                dilation=self.right_fe_dilation,
                 maxpool=True,
                 dropout=True
             )
-        ])
-        for i in range(self.fe2_layers):
+        )
+        for i in range(self.fe2_layers - 1):
             feature_extraction2_layer.extend([
                 conv1d_block(
-                    in_channels=self.hidden_channels,
-                    out_channels=self.hidden_channels,
-                    kernel_size=self.kernel_size,
-                    padding=self.padding,
-                    stride=self.stride,
-                    dilation=4
+                    in_channels=self.right_hidden_channels[i],
+                    out_channels=self.right_hidden_channels[i + 1],
+                    kernel_size=self.right_fe_kernel_size,
+                    padding=self.right_fe_padding,
+                    stride=self.right_fe_stride,
+                    dilation=self.right_fe_dilation
                 )
             ])
         self.feature_extraction_right = nn.Sequential(

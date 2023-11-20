@@ -22,7 +22,9 @@ class PrecTime(nn.Module):
         self.encoder = encoder
         self.decoder = decoder
         self.cfg = cfg
-        self.fc1 = nn.Linear(self.cfg.feature_extractor.hidden_channels * 2 * (self.cfg.sequence_length // self.cfg.chunks // 2), 64
+        self.fc_after_fe = nn.Linear(
+            (self.cfg.feature_extractor.left_hidden_channels[-1] + self.cfg.feature_extractor.right_hidden_channels[-1]) *
+            (self.cfg.sequence_length // self.cfg.chunks // 2), self.cfg.encoder.input_size[0]
         )
 
         self.inter_upsample = nn.Upsample(
@@ -64,7 +66,7 @@ class PrecTime(nn.Module):
         features_combined_flat = features_combined.view(origin_x.shape[0], self.cfg.chunks, -1) # (batzh, chunks, flaten_features)
         #print("The shape after the flatten of concat output:",features_combined_flat.shape)
         
-        features_combined_flat = self.fc1(features_combined_flat)
+        features_combined_flat = self.fc_after_fe(features_combined_flat)
         #print("The shape after using fc to reduce dimension:",features_combined_flat.shape)
         output1, di = self.encoder(features_combined_flat)
         #print(f"The first output is {output1.shape}")
@@ -84,7 +86,7 @@ class PrecTime(nn.Module):
         logits = final_output
         # reduce overlap_interval 
         #print(f"logist shape is {logits.shape}") 
-        logits = logits[:, (self.cfg.overlap_interval // self.cfg.downsample_rate) : logits.shape[1] - (self.cfg.overlap_interval // self.cfg.downsample_rate), :]
+        logits = logits[:, (self.cfg.overlap_interval) : logits.shape[1] - (self.cfg.overlap_interval), :]
         #print(f"labels shape is {labels.shape}")
         output = {"logits": logits}
         if labels is not None:

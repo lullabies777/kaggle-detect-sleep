@@ -75,11 +75,18 @@ def get_feature_extractor(
     elif cfg.feature_extractor.name == "PrecFeatureExtractor":
         feature_extractor = PrecFeatureExtractor(
             input_channels=feature_dim,
-            hidden_channels=cfg.feature_extractor.hidden_channels,
-            kernel_size=cfg.feature_extractor.kernel_size,
-            padding=cfg.feature_extractor.padding,
-            stride=cfg.feature_extractor.stride,
-            dilation=cfg.feature_extractor.dilation
+            left_hidden_channels=cfg.feature_extractor.left_hidden_channels,
+            right_hidden_channels=cfg.feature_extractor.right_hidden_channels,
+            left_fe_kernel_size=cfg.feature_extractor.left_fe_kernel_size,
+            right_fe_kernel_size=cfg.feature_extractor.right_fe_kernel_size,
+            left_fe_padding=cfg.feature_extractor.left_fe_padding,
+            right_fe_padding=cfg.feature_extractor.right_fe_padding,
+            left_fe_stride=cfg.feature_extractor.left_fe_stride,
+            right_fe_stride=cfg.feature_extractor.right_fe_stride,
+            left_fe_dilation=cfg.feature_extractor.left_fe_dilation,
+            right_fe_dilation=cfg.feature_extractor.right_fe_dilation,
+            fe1_layers=cfg.feature_extractor.fe1_layers,
+            fe2_layers=cfg.feature_extractor.fe2_layers
         )
     else:
         raise ValueError(f"Invalid feature extractor name: {cfg.feature_extractor.name}")

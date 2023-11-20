@@ -1,9 +1,14 @@
 name: PrecFeatureExtractor
 in_channels: 4
-hidden_channels: 64
-kernel_size: 5
-padding: 2
-stride: 1
-dilation: 1
-fe1_layers: 2
-fe2_layers: 2
+left_hidden_channels: [32, 64, 128, 256]
+right_hidden_channels: [32, 64, 128, 128]
+left_fe_kernel_size: 5
+right_fe_kernel_size: 5
+left_fe_padding: 0
+right_fe_padding: 0
+left_fe_stride: 1
+right_fe_stride: 1
+left_fe_dilation: 1
+right_fe_dilation: 1
+fe1_layers: 4
+fe2_layers: 4
