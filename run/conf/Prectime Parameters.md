@@ -41,9 +41,8 @@
 
 # decoder
 - [ ] out_channels: int # 这里定死为128
-- [ ] pr_kernel_size: int # 都使用同一个kernel_size
-- [ ] pr_padding: int
-- [ ] pr_stride: int # 默认为1
-- [ ] pr_dilation: int
-- [ ] num_classes: int # 默认为3
+- [ ] kernel_size: int # 都使用同一个kernel_size
+- [ ] padding: int
+- [ ] stride: int # 默认为1
+- [ ] dilation: int
 - [ ] mode: str

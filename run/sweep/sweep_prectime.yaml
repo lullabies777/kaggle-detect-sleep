@@ -1,0 +1,26 @@
+program: run/train_prectime.py
+name: Prectime
+
+metric:
+  name: val_best_score
+  goal: maximize
+
+method: grid
+parameters:
+    feature_extractor.left_hidden_channels:
+        values: [[32,32,32,32], [64,64,64,64], [128,128,128,128],[32,64,128,128],[32,64,128,256]]
+    feature_extractor.right_hidden_channels:
+        values: [[32,32,32,32], [64,64,64,64], [128,128,128,128],[32,64,128,128],[32,64,128,256]]
+    encoder.fe_fc_dimension:
+        values: [64]
+    encoder.lstm_dimensions:
+        values: [[100,200]]
+    decoder.out_channels:
+        values: [64,128]
+        
+command:
+- ${env}
+- ${interpreter}
+- ${program}
+- ${args_no_hyphens}
+- exp_name=Prectime
