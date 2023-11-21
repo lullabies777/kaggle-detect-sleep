@@ -1,3 +1,4 @@
+from src.utils.common import trace
 import shutil
 from pathlib import Path
 
@@ -8,7 +9,6 @@ from omegaconf import DictConfig
 from tqdm import tqdm
 import sys
 sys.path.append('./')
-from src.utils.common import trace
 
 SERIES_SCHEMA = {
     "series_id": pl.Utf8,
@@ -45,8 +45,10 @@ def to_coord(x: pl.Expr, max_: int, name: str) -> list[pl.Expr]:
 
     return [x_sin.alias(f"{name}_sin"), x_cos.alias(f"{name}_cos")]
 
+
 def deg_to_rad(x: pl.Expr) -> pl.Expr:
     return np.pi / 180 * x
+
 
 def add_feature(series_df: pl.DataFrame) -> pl.DataFrame:
     series_df = series_df.with_row_count("step").with_columns(
@@ -93,26 +95,76 @@ def main(cfg: DictConfig):
             raise ValueError(f"Invalid phase: {cfg.phase}")
 
         # preprocess
+        # series_df = (
+        #     series_lf.with_columns(
+        #         pl.col("timestamp").str.to_datetime("%Y-%m-%dT%H:%M:%S%z"),
+        #         deg_to_rad(pl.col("anglez")).alias("anglez_rad"),
+        #         (pl.col("anglez") - ANGLEZ_MEAN) / ANGLEZ_STD,
+        #         (pl.col("enmo") - ENMO_MEAN) / ENMO_STD,
+        #     )
+        #     .select(
+        #         [
+        #             pl.col("series_id"),
+        #             pl.col("anglez"),
+        #             pl.col("enmo"),
+        #             pl.col("timestamp"),
+        #             pl.col("anglez_rad")
+        #         ]
+        #     )
+        #     .collect(streaming=True)
+        #     .sort(by=["series_id", "timestamp"])
+        # )
+        # n_unique = series_df.get_column("series_id").n_unique()
+
+        # 修改之后，添加shift和rolling features
         series_df = (
             series_lf.with_columns(
                 pl.col("timestamp").str.to_datetime("%Y-%m-%dT%H:%M:%S%z"),
                 deg_to_rad(pl.col("anglez")).alias("anglez_rad"),
                 (pl.col("anglez") - ANGLEZ_MEAN) / ANGLEZ_STD,
                 (pl.col("enmo") - ENMO_MEAN) / ENMO_STD,
+
+                *[pl.col("anglez").shift(i).alias(f"anglez_lag_{i}") for i in range(1, 60, 12)],
+                *[pl.col("enmo").shift(i).alias(f"enmo_lag_{i}") for i in range(1, 60, 12)],
+
+                *[pl.col("anglez").rolling_mean(window_size).alias(
+                    f"anglez_mean_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                *[pl.col("anglez").rolling_min(window_size).alias(
+                    f"anglez_min_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                *[pl.col("anglez").rolling_max(window_size).alias(
+                    f"anglez_max_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                *[pl.col("anglez").rolling_std(window_size).alias(
+                    f"anglez_std_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                *[pl.col("enmo").rolling_mean(window_size).alias(
+                    f"enmo_mean_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                *[pl.col("enmo").rolling_min(window_size).alias(
+                    f"enmo_min_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                *[pl.col("enmo").rolling_max(window_size).alias(
+                    f"enmo_max_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                *[pl.col("enmo").rolling_std(window_size).alias(
+                    f"enmo_std_{window_size}") for window_size in [12, 24, 36, 48, 60]]
             )
             .select(
                 [
-                    pl.col("series_id"), 
-                    pl.col("anglez"), 
-                    pl.col("enmo"), 
+                    pl.col("series_id"),
+                    pl.col("anglez"),
+                    pl.col("enmo"),
                     pl.col("timestamp"),
-                    pl.col("anglez_rad")
+                    pl.col("anglez_rad"),
+                    *[pl.col(f"anglez_lag_{i}") for i in range(1, 60, 12)],
+                    *[pl.col(f"enmo_lag_{i}") for i in range(1, 60, 12)],
+                    *[pl.col(f"anglez_{stat}_{window_size}") for stat in
+                      ["mean", "min", "max", "std"] for window_size in [12, 24, 36, 48, 60]],
+                    *[pl.col(f"enmo_{stat}_{window_size}") for stat in
+                      ["mean", "min", "max", "std"] for window_size in [12, 24, 36, 48, 60]]
                 ]
             )
             .collect(streaming=True)
             .sort(by=["series_id", "timestamp"])
         )
+        print(series_df.head())
         n_unique = series_df.get_column("series_id").n_unique()
+
     with trace("Save features"):
         for series_id, this_series_df in tqdm(series_df.group_by("series_id"), total=n_unique):
             # 特徴量を追加
