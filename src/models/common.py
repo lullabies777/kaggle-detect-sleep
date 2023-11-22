@@ -162,7 +162,7 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
         if cfg.encoder.encoder_type=='lstm':
             cfg.decoder.in_channels = cfg.feature_extractor.left_hidden_channels[-1] + cfg.feature_extractor.right_hidden_channels[-1] + cfg.encoder.lstm_dimensions[-1] * 2
         elif cfg.encoder.encoder_type=='transformer':
-            cfg.decoder.in_channels = cfg.feature_extractor.left_hidden_channels[-1] + cfg.feature_extractor.right_hidden_channels[-1] + cfg.encoder.dim_feedforward
+            cfg.decoder.in_channels = cfg.feature_extractor.left_hidden_channels[-1] + cfg.feature_extractor.right_hidden_channels[-1] + cfg.encoder.fe_fc_dimension
         print(cfg.decoder.in_channels)
         decoder = PredictionRefinement(
             in_channels= cfg.decoder.in_channels,
