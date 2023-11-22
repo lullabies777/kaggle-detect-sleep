@@ -112,7 +112,13 @@ def get_encoder(cfg: DictConfig, feature_extractor: FEATURE_EXTRACTORS):
             lstm_dimensions= cfg.encoder.lstm_dimensions,
             num_layers= cfg.encoder.num_layers,
             sequence_length= cfg.sequence_length,
-            chunks= cfg.chunks
+            chunks= cfg.chunks,
+            n_head= cfg.encoder.n_head,
+            dropout= cfg.encoder.dropout,
+            num_encoder_layers= cfg.encoder.num_encoder_layers,
+            dim_feedforward= cfg.encoder.dim_feedforward,
+            encoder_type= cfg.encoder.encoder_type,
+            activation= cfg.encoder.activation
         )
     else:
         raise ValueError(f"Invalid encoder name: {cfg.encoder.name}")
@@ -153,7 +159,10 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
     elif cfg.decoder.name == "MLPDecoder":
         decoder = MLPDecoder(n_channels=n_channels, n_classes=n_classes)
     elif cfg.decoder.name == 'PredictionRefinement':
-        cfg.decoder.in_channels = cfg.feature_extractor.left_hidden_channels[-1] + cfg.feature_extractor.right_hidden_channels[-1] + cfg.encoder.lstm_dimensions[-1] * 2
+        if cfg.encoder.encoder_type=='lstm':
+            cfg.decoder.in_channels = cfg.feature_extractor.left_hidden_channels[-1] + cfg.feature_extractor.right_hidden_channels[-1] + cfg.encoder.lstm_dimensions[-1] * 2
+        elif cfg.encoder.encoder_type=='transformer':
+            cfg.decoder.in_channels = cfg.feature_extractor.left_hidden_channels[-1] + cfg.feature_extractor.right_hidden_channels[-1] + cfg.encoder.dim_feedforward
         print(cfg.decoder.in_channels)
         decoder = PredictionRefinement(
             in_channels= cfg.decoder.in_channels,

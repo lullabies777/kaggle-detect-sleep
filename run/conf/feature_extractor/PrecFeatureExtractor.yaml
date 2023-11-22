@@ -1,7 +1,7 @@
 name: PrecFeatureExtractor
 in_channels: 4
 left_hidden_channels: [64,64,64,64]
-right_hidden_channels: [64,64,64,128]
+right_hidden_channels: [64,64,64,64]
 left_fe_kernel_size: 5
 right_fe_kernel_size: 5
 left_fe_padding: 0

@@ -58,29 +58,29 @@ class PrecTime(nn.Module):
 
         x = x.transpose(0, 1).reshape(
             x.shape[1], -1, x.shape[2] // self.cfg.chunks
-        ).transpose(0, 1)
+        ).transpose(0, 1) # (batzh*chunks, features, seq_length//chunks)
 
         #print("The shape put into feature extraction:", x.shape)
-        features_combined = self.feature_extractor(x)
+        features_combined = self.feature_extractor(x) # (batzh*chunks, features, length)
         #print("The shape of concat output:", features_combined.shape)
-        features_combined_flat = features_combined.view(origin_x.shape[0], self.cfg.chunks,-1) # (batzh, chunks, flaten_features)
+        features_combined_flat = features_combined.view(origin_x.shape[0], self.cfg.chunks,-1) # (batzh, chunks, features * length)
         #print("The shape after the flatten of concat output:",features_combined_flat.shape)
         
-        features_combined_flat = self.fc_after_fe(features_combined_flat)
+        features_combined_flat = self.fc_after_fe(features_combined_flat) # (batzh, chunks, features * length)
         #print("The shape after using fc to reduce dimension:",features_combined_flat.shape)
-        output1, di = self.encoder(features_combined_flat)
+        output1, di = self.encoder(features_combined_flat) # (batch, features, length)
         #print(f"The first output is {output1.shape}")
-
+        #print(f"di is {di.shape}")
         ui = features_combined.transpose(0, 1).reshape(
             features_combined.shape[1], origin_x.shape[0], -1
-        ).transpose(0, 1)
-        #print("The shape after Reshaping Ui:", ui.shape)
-        combine_ui_di = torch.cat([ui, di], dim=1)
+        ).transpose(0, 1) # (batch, features, length)
+        #print("The shape after Reshaping Ui:", ui.shape) 
+        combine_ui_di = torch.cat([ui, di], dim=1) #(batch, features, length)
         #print("The shape after combining Ui and Di:", combine_ui_di.shape)
 
-        final_output = self.decoder(combine_ui_di) # (batch, chanels, timestamps)
+        final_output = self.decoder(combine_ui_di) # (batch, features, length)
         #print("The shape after prediction refinement:", final_output.shape)
-        final_output = self.fc_final(final_output.permute(0, 2, 1)) # (batch, timestamps, n_classes)
+        final_output = self.fc_final(final_output.permute(0, 2, 1)) # (batch, length, n_classes)
         #print("The final shape after fc:", final_output.shape)
 
         logits = final_output
