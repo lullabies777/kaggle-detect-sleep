@@ -116,13 +116,37 @@ def main(cfg: DictConfig):
         # )
         # n_unique = series_df.get_column("series_id").n_unique()
 
+        # 先做标准化处理
+        grouped_stats = series_lf.groupby('series_id').agg([
+            pl.col('angelz').mean().alias('angelz_mean'),
+            pl.col('angelz').std().alias('angelz_std'),
+            pl.col('enmo').mean().alias('enmo_mean'),
+            pl.col('enmo').std().alias('enmo_std')
+        ])
+
+        series_lf = series_lf.join(grouped_stats, on='series_id')
+
+        series_lf = series_lf.with_columns([
+            ((pl.col('angelz') - pl.col('angelz_mean')) /
+             pl.col('angelz_std')).alias('normalized_angelz'),
+            ((pl.col('enmo') - pl.col('enmo_mean')) /
+             pl.col('enmo_std')).alias('normalized_enmo')
+        ])
+
+        series_lf = series_lf.drop(
+            ['angelz', 'enmo', 'angelz_mean', 'angelz_std', 'enmo_mean', 'enmo_std']
+        )
+
+        series_lf = series_lf.with_column_renamed('normalized_angelz', 'angelz').with_column_renamed(
+            'normalized_enmo', 'enmo')
+
         # 修改之后，添加shift和rolling features
         series_df = (
             series_lf.with_columns(
                 pl.col("timestamp").str.to_datetime("%Y-%m-%dT%H:%M:%S%z"),
                 deg_to_rad(pl.col("anglez")).alias("anglez_rad"),
-                (pl.col("anglez") - ANGLEZ_MEAN) / ANGLEZ_STD,
-                (pl.col("enmo") - ENMO_MEAN) / ENMO_STD,
+                # (pl.col("anglez") - ANGLEZ_MEAN) / ANGLEZ_STD,
+                # (pl.col("enmo") - ENMO_MEAN) / ENMO_STD,
 
                 *[pl.col("anglez").shift(i).alias(f"anglez_lag_{i}") for i in range(1, 60, 12)],
                 *[pl.col("enmo").shift(i).alias(f"enmo_lag_{i}") for i in range(1, 60, 12)],
