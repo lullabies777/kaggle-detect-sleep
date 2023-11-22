@@ -146,7 +146,7 @@ def main(cfg: DictConfig):
 
         series_lf = series_lf.drop(
             ['normalized_anglez', 'normalized_enmo']
-        )
+        ).sort(by=['series_id', 'timestamp'])
 
         print(series_lf.columns)
 
