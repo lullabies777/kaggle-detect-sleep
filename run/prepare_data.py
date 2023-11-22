@@ -1,14 +1,13 @@
+from tqdm import tqdm
+from omegaconf import DictConfig
+import polars as pl
+import numpy as np
+import hydra
+from pathlib import Path
+import shutil
+from src.utils.common import trace
 import sys
 sys.path.append('./')
-from src.utils.common import trace
-import shutil
-from pathlib import Path
-
-import hydra
-import numpy as np
-import polars as pl
-from omegaconf import DictConfig
-from tqdm import tqdm
 
 
 SERIES_SCHEMA = {
@@ -152,16 +151,68 @@ def main(cfg: DictConfig):
         print(series_lf.columns)
 
         # 修改之后，添加shift和rolling features
+        # series_df = (
+        #     series_lf.with_columns(
+        #         pl.col("timestamp").str.to_datetime("%Y-%m-%dT%H:%M:%S%z"),
+        #         deg_to_rad(pl.col("anglez")).alias("anglez_rad"),
+        #         # (pl.col("anglez") - ANGLEZ_MEAN) / ANGLEZ_STD,
+        #         # (pl.col("enmo") - ENMO_MEAN) / ENMO_STD,
+
+        #         *[pl.col("anglez").shift(i).alias(f"anglez_lag_{i}") for i in range(-24, 24, 12)],
+        #         *[pl.col("enmo").shift(i).alias(f"enmo_lag_{i}") for i in range(-24, 24, 12)],
+
+        #         *[pl.col("anglez").rolling_mean(window_size).alias(
+        #             f"anglez_mean_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+        #         *[pl.col("anglez").rolling_min(window_size).alias(
+        #             f"anglez_min_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+        #         *[pl.col("anglez").rolling_max(window_size).alias(
+        #             f"anglez_max_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+        #         *[pl.col("anglez").rolling_std(window_size).alias(
+        #             f"anglez_std_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+        #         *[pl.col("enmo").rolling_mean(window_size).alias(
+        #             f"enmo_mean_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+        #         *[pl.col("enmo").rolling_min(window_size).alias(
+        #             f"enmo_min_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+        #         *[pl.col("enmo").rolling_max(window_size).alias(
+        #             f"enmo_max_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+        #         *[pl.col("enmo").rolling_std(window_size).alias(
+        #             f"enmo_std_{window_size}") for window_size in [12, 24, 36, 48, 60]]
+        #     )
+        #     .select(
+        #         [
+        #             pl.col("series_id"),
+        #             pl.col("anglez"),
+        #             pl.col("enmo"),
+        #             pl.col("timestamp"),
+        #             pl.col("anglez_rad"),
+        #             *[pl.col(f"anglez_lag_{i}") for i in range(-24, 24, 12)],
+        #             *[pl.col(f"enmo_lag_{i}") for i in range(-24, 24, 12)],
+        #             *[pl.col(f"anglez_{stat}_{window_size}") for stat in
+        #               ["mean", "min", "max", "std"] for window_size in [12, 24, 36, 48, 60]],
+        #             *[pl.col(f"enmo_{stat}_{window_size}") for stat in
+        #               ["mean", "min", "max", "std"] for window_size in [12, 24, 36, 48, 60]]
+        #         ]
+        #     )
+        #     .collect(streaming=True)
+        #     .sort(by=["series_id", "timestamp"])
+        # )
+
+        # 更新之后 rolling feature只存在于同一个series_id的内容之间
         series_df = (
             series_lf.with_columns(
                 pl.col("timestamp").str.to_datetime("%Y-%m-%dT%H:%M:%S%z"),
                 deg_to_rad(pl.col("anglez")).alias("anglez_rad"),
-                # (pl.col("anglez") - ANGLEZ_MEAN) / ANGLEZ_STD,
-                # (pl.col("enmo") - ENMO_MEAN) / ENMO_STD,
-
-                *[pl.col("anglez").shift(i).alias(f"anglez_lag_{i}") for i in range(1, 60, 12)],
-                *[pl.col("enmo").shift(i).alias(f"enmo_lag_{i}") for i in range(1, 60, 12)],
-
+            )
+            .group_by("series_id")
+            .agg([
+                pl.col("anglez"),
+                pl.col("enmo"),
+                pl.col("timestamp"),
+                pl.col("anglez_rad"),
+                *[pl.col("anglez").shift(i).alias(f"anglez_lag_{i}")
+                  for i in range(-24, 24, 12) if i != 0],
+                *[pl.col("enmo").shift(i).alias(f"enmo_lag_{i}")
+                  for i in range(-24, 24, 12) if i != 0],
                 *[pl.col("anglez").rolling_mean(window_size).alias(
                     f"anglez_mean_{window_size}") for window_size in [12, 24, 36, 48, 60]],
                 *[pl.col("anglez").rolling_min(window_size).alias(
@@ -177,23 +228,17 @@ def main(cfg: DictConfig):
                 *[pl.col("enmo").rolling_max(window_size).alias(
                     f"enmo_max_{window_size}") for window_size in [12, 24, 36, 48, 60]],
                 *[pl.col("enmo").rolling_std(window_size).alias(
-                    f"enmo_std_{window_size}") for window_size in [12, 24, 36, 48, 60]]
-            )
-            .select(
-                [
-                    pl.col("series_id"),
-                    pl.col("anglez"),
-                    pl.col("enmo"),
-                    pl.col("timestamp"),
-                    pl.col("anglez_rad"),
-                    *[pl.col(f"anglez_lag_{i}") for i in range(1, 60, 12)],
-                    *[pl.col(f"enmo_lag_{i}") for i in range(1, 60, 12)],
-                    *[pl.col(f"anglez_{stat}_{window_size}") for stat in
-                      ["mean", "min", "max", "std"] for window_size in [12, 24, 36, 48, 60]],
-                    *[pl.col(f"enmo_{stat}_{window_size}") for stat in
-                      ["mean", "min", "max", "std"] for window_size in [12, 24, 36, 48, 60]]
-                ]
-            )
+                    f"enmo_std_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+            ])
+            .explode([
+                "anglez", "enmo", "timestamp", "anglez_rad",
+                *[f"anglez_lag_{i}" for i in range(-24, 24, 12) if i != 0],
+                *[f"enmo_lag_{i}" for i in range(-24, 24, 12) if i != 0],
+                *[f"anglez_{stat}_{window_size}" for stat in
+                  ["mean", "min", "max", "std"] for window_size in [12, 24, 36, 48, 60]],
+                *[f"enmo_{stat}_{window_size}" for stat in
+                  ["mean", "min", "max", "std"] for window_size in [12, 24, 36, 48, 60]],
+            ])
             .collect(streaming=True)
             .sort(by=["series_id", "timestamp"])
         )
