@@ -1,3 +1,5 @@
+import sys
+sys.path.append('./')
 from src.utils.common import trace
 import shutil
 from pathlib import Path
@@ -7,8 +9,7 @@ import numpy as np
 import polars as pl
 from omegaconf import DictConfig
 from tqdm import tqdm
-import sys
-sys.path.append('./')
+
 
 SERIES_SCHEMA = {
     "series_id": pl.Utf8,
@@ -117,28 +118,38 @@ def main(cfg: DictConfig):
         # n_unique = series_df.get_column("series_id").n_unique()
 
         # 先做标准化处理
-        grouped_stats = series_lf.groupby('series_id').agg([
-            pl.col('angelz').mean().alias('angelz_mean'),
-            pl.col('angelz').std().alias('angelz_std'),
+        grouped_stats = series_lf.group_by('series_id').agg([
+            pl.col('anglez').mean().alias('anglez_mean'),
+            pl.col('anglez').std().alias('anglez_std'),
             pl.col('enmo').mean().alias('enmo_mean'),
             pl.col('enmo').std().alias('enmo_std')
         ])
 
-        series_lf = series_lf.join(grouped_stats, on='series_id')
+        series_lf = series_lf.join(grouped_stats, on='series_id', how="left")
+
+        print(series_lf.columns)
 
         series_lf = series_lf.with_columns([
-            ((pl.col('angelz') - pl.col('angelz_mean')) /
-             pl.col('angelz_std')).alias('normalized_angelz'),
+            ((pl.col('anglez') - pl.col('anglez_mean')) /
+                pl.col('anglez_std')).alias('normalized_anglez'),
             ((pl.col('enmo') - pl.col('enmo_mean')) /
-             pl.col('enmo_std')).alias('normalized_enmo')
+                pl.col('enmo_std')).alias('normalized_enmo')
         ])
 
         series_lf = series_lf.drop(
-            ['angelz', 'enmo', 'angelz_mean', 'angelz_std', 'enmo_mean', 'enmo_std']
+            ['anglez', 'enmo', 'anglez_mean', 'anglez_std', 'enmo_mean', 'enmo_std']
         )
 
-        series_lf = series_lf.with_column_renamed('normalized_angelz', 'angelz').with_column_renamed(
-            'normalized_enmo', 'enmo')
+        series_lf = series_lf.with_columns([
+            pl.col('normalized_anglez').alias('anglez'),
+            pl.col('normalized_enmo').alias('enmo')
+        ])
+
+        series_lf = series_lf.drop(
+            ['normalized_anglez', 'normalized_enmo']
+        )
+
+        print(series_lf.columns)
 
         # 修改之后，添加shift和rolling features
         series_df = (
