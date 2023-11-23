@@ -9,6 +9,29 @@ from src.utils.common import trace
 import sys
 sys.path.append('./')
 
+window_steps = [12, 24, 36, 48, 60]
+shift_start = -24
+shift_end = 24
+shift_step = 12
+
+new_feature_names = []
+
+
+for i in range(shift_start, shift_end, shift_step):
+    if i != 0:
+        name_anglez = f"anglez_lag_{i}"
+        new_feature_names.append(name_anglez)
+        name_enmo = f"enmo_lag_{i}"
+        new_feature_names.append(name_enmo)
+
+for i in window_steps:
+    for metric in ["min", "max", "std", "mean"]:
+        new_anglez_feature = f"anglez_{metric}_{i}"
+        new_feature_names.append(new_anglez_feature)
+        new_enmo_feature = f"enmo_{metric}_{i}"
+        new_feature_names.append(new_enmo_feature)
+
+print(new_feature_names)
 
 SERIES_SCHEMA = {
     "series_id": pl.Utf8,
@@ -31,6 +54,8 @@ FEATURE_NAMES = [
     "anglez_sin",
     "anglez_cos",
 ]
+
+FEATURE_NAMES.extend(new_feature_names)
 
 ANGLEZ_MEAN = -8.810476
 ANGLEZ_STD = 35.521877
@@ -158,8 +183,8 @@ def main(cfg: DictConfig):
         #         # (pl.col("anglez") - ANGLEZ_MEAN) / ANGLEZ_STD,
         #         # (pl.col("enmo") - ENMO_MEAN) / ENMO_STD,
 
-        #         *[pl.col("anglez").shift(i).alias(f"anglez_lag_{i}") for i in range(-24, 24, 12)],
-        #         *[pl.col("enmo").shift(i).alias(f"enmo_lag_{i}") for i in range(-24, 24, 12)],
+        #         *[pl.col("anglez").shift(i).alias(f"anglez_lag_{i}") for i in range(shift_start, shift_end, shift_step)],
+        #         *[pl.col("enmo").shift(i).alias(f"enmo_lag_{i}") for i in range(shift_start, shift_end, shift_step)],
 
         #         *[pl.col("anglez").rolling_mean(window_size).alias(
         #             f"anglez_mean_{window_size}") for window_size in [12, 24, 36, 48, 60]],
@@ -185,8 +210,8 @@ def main(cfg: DictConfig):
         #             pl.col("enmo"),
         #             pl.col("timestamp"),
         #             pl.col("anglez_rad"),
-        #             *[pl.col(f"anglez_lag_{i}") for i in range(-24, 24, 12)],
-        #             *[pl.col(f"enmo_lag_{i}") for i in range(-24, 24, 12)],
+        #             *[pl.col(f"anglez_lag_{i}") for i in range(shift_start, shift_end, shift_step)],
+        #             *[pl.col(f"enmo_lag_{i}") for i in range(shift_start, shift_end, shift_step)],
         #             *[pl.col(f"anglez_{stat}_{window_size}") for stat in
         #               ["mean", "min", "max", "std"] for window_size in [12, 24, 36, 48, 60]],
         #             *[pl.col(f"enmo_{stat}_{window_size}") for stat in
@@ -210,34 +235,34 @@ def main(cfg: DictConfig):
                 pl.col("timestamp"),
                 pl.col("anglez_rad"),
                 *[pl.col("anglez").shift(i).alias(f"anglez_lag_{i}")
-                  for i in range(-24, 24, 12) if i != 0],
+                  for i in range(shift_start, shift_end, shift_step) if i != 0],
                 *[pl.col("enmo").shift(i).alias(f"enmo_lag_{i}")
-                  for i in range(-24, 24, 12) if i != 0],
+                  for i in range(shift_start, shift_end, shift_step) if i != 0],
                 *[pl.col("anglez").rolling_mean(window_size).alias(
-                    f"anglez_mean_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                    f"anglez_mean_{window_size}") for window_size in window_steps],
                 *[pl.col("anglez").rolling_min(window_size).alias(
-                    f"anglez_min_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                    f"anglez_min_{window_size}") for window_size in window_steps],
                 *[pl.col("anglez").rolling_max(window_size).alias(
-                    f"anglez_max_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                    f"anglez_max_{window_size}") for window_size in window_steps],
                 *[pl.col("anglez").rolling_std(window_size).alias(
-                    f"anglez_std_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                    f"anglez_std_{window_size}") for window_size in window_steps],
                 *[pl.col("enmo").rolling_mean(window_size).alias(
-                    f"enmo_mean_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                    f"enmo_mean_{window_size}") for window_size in window_steps],
                 *[pl.col("enmo").rolling_min(window_size).alias(
-                    f"enmo_min_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                    f"enmo_min_{window_size}") for window_size in window_steps],
                 *[pl.col("enmo").rolling_max(window_size).alias(
-                    f"enmo_max_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                    f"enmo_max_{window_size}") for window_size in window_steps],
                 *[pl.col("enmo").rolling_std(window_size).alias(
-                    f"enmo_std_{window_size}") for window_size in [12, 24, 36, 48, 60]],
+                    f"enmo_std_{window_size}") for window_size in window_steps],
             ])
             .explode([
                 "anglez", "enmo", "timestamp", "anglez_rad",
-                *[f"anglez_lag_{i}" for i in range(-24, 24, 12) if i != 0],
-                *[f"enmo_lag_{i}" for i in range(-24, 24, 12) if i != 0],
+                *[f"anglez_lag_{i}" for i in range(shift_start, shift_end, shift_step) if i != 0],
+                *[f"enmo_lag_{i}" for i in range(shift_start, shift_end, shift_step) if i != 0],
                 *[f"anglez_{stat}_{window_size}" for stat in
-                  ["mean", "min", "max", "std"] for window_size in [12, 24, 36, 48, 60]],
+                  ["mean", "min", "max", "std"] for window_size in window_steps],
                 *[f"enmo_{stat}_{window_size}" for stat in
-                  ["mean", "min", "max", "std"] for window_size in [12, 24, 36, 48, 60]],
+                  ["mean", "min", "max", "std"] for window_size in window_steps],
             ])
             .collect(streaming=True)
             .sort(by=["series_id", "timestamp"])
