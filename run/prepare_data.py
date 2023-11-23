@@ -242,6 +242,7 @@ def main(cfg: DictConfig):
             .collect(streaming=True)
             .sort(by=["series_id", "timestamp"])
         )
+        series_df = series_df.fill_null(0.0)
         print(series_df.head())
         n_unique = series_df.get_column("series_id").n_unique()
 
