@@ -62,7 +62,7 @@ labels:
 
 # feature
 features:
-- "anglez"
+  - "anglez"
   - "enmo"
   # - "step"
   # - "month_sin"
