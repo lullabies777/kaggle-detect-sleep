@@ -16,7 +16,7 @@ from pytorch_lightning.callbacks import (
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from src.datamodule.seg import SegDataModule
-from src.modelmodule.seg_prectime import SegModel_prectime
+from src.modelmodule.seg_combined import SegModel_combined
 from time import gmtime, strftime
 import argparse 
 import os
@@ -27,7 +27,7 @@ logging.basicConfig(
 )
 LOGGER = logging.getLogger(Path(__file__).name)
 
-@hydra.main(config_path="conf", config_name="train_prectime", version_base="1.2")
+@hydra.main(config_path="conf", config_name="train_combined", version_base="1.2")
 def main(cfg: DictConfig):  # type: ignore
     seed_everything(cfg.seed)
     cfg.sequence_length = cfg.duration + 2 * cfg.overlap_interval
@@ -43,7 +43,7 @@ def main(cfg: DictConfig):  # type: ignore
     
     datamodule = SegDataModule(cfg)
     LOGGER.info("Set Up DataModule")
-    model = SegModel_prectime(
+    model = SegModel_combined(
         cfg, datamodule.valid_event_df, len(cfg.features), len(cfg.labels), cfg.duration
     )
     print(model)
@@ -90,7 +90,7 @@ def main(cfg: DictConfig):  # type: ignore
     print("best model path: ", checkpoint_cb.best_model_path)
     
     # load best weights
-    model = SegModel_prectime.load_from_checkpoint(
+    model = SegModel_combined.load_from_checkpoint(
         checkpoint_cb.best_model_path,
         cfg=cfg,
         val_event_df=datamodule.valid_event_df,

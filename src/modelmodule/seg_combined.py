@@ -15,7 +15,7 @@ from src.utils.metrics import event_detection_ap
 from src.utils.post_process import post_process_for_seg, post_process_for_seg_v2
 
 
-class SegModel_prectime(LightningModule):
+class SegModel_combined(LightningModule):
     def __init__(
         self,
         cfg: DictConfig,

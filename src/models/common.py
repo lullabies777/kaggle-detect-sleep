@@ -8,23 +8,25 @@ from src.models.decoder.mlpdecoder import MLPDecoder
 from src.models.decoder.transformerdecoder import TransformerDecoder
 from src.models.decoder.unet1ddecoder import UNet1DDecoder
 from src.models.decoder.PredictionRefinement import PredictionRefinement
+from src.models.decoder.cnn_transformer import cnn_transformer
 from src.models.feature_extractor.cnn import CNNSpectrogram
 from src.models.feature_extractor.lstm import LSTMFeatureExtractor
 from src.models.feature_extractor.panns import PANNsFeatureExtractor
 from src.models.feature_extractor.spectrogram import SpecFeatureExtractor
 from src.models.feature_extractor.PrecFeatureExtractor import PrecFeatureExtractor
 from src.models.encoder.ContextDetection import ContextDetection
+from src.models.encoder.Residual_lstm import Residual_lstm
 from src.models.spec1D import Spec1D
 from src.models.spec2Dcnn import Spec2DCNN
 from src.models.PrecTime import PrecTime
+from src.models.Combined import Combined
 
 import segmentation_models_pytorch as smp
 
 FEATURE_EXTRACTORS = Union[
-    CNNSpectrogram, PANNsFeatureExtractor, LSTMFeatureExtractor, SpecFeatureExtractor, PrecFeatureExtractor
-]
-DECODERS = Union[UNet1DDecoder, LSTMDecoder, TransformerDecoder, MLPDecoder, PredictionRefinement]
-MODELS = Union[Spec1D, Spec2DCNN, PrecTime]
+    CNNSpectrogram, PANNsFeatureExtractor, LSTMFeatureExtractor, SpecFeatureExtractor, PrecFeatureExtractor]
+DECODERS = Union[UNet1DDecoder, LSTMDecoder, TransformerDecoder, MLPDecoder, PredictionRefinement,cnn_transformer]
+MODELS = Union[Spec1D, Spec2DCNN, PrecTime, Combined]
 
 
 
@@ -120,6 +122,13 @@ def get_encoder(cfg: DictConfig, feature_extractor: FEATURE_EXTRACTORS):
             encoder_type= cfg.encoder.encoder_type,
             activation= cfg.encoder.activation
         )
+    elif cfg.encoder.name == 'Residual_lstm':
+        encoder = Residual_lstm(
+            input_dimension= cfg.encoder.input_dimension,
+            num_layers= cfg.encoder.num_layers,
+            dropout= cfg.encoder.dropout,
+            names= cfg.encoder.names
+        )
     else:
         raise ValueError(f"Invalid encoder name: {cfg.encoder.name}")
     
@@ -161,9 +170,9 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
     elif cfg.decoder.name == 'PredictionRefinement':
         if cfg.encoder.encoder_type=='lstm':
             cfg.decoder.in_channels = cfg.feature_extractor.left_hidden_channels[-1] + cfg.feature_extractor.right_hidden_channels[-1] + cfg.encoder.lstm_dimensions[-1] * 2
+            
         elif cfg.encoder.encoder_type=='transformer':
             cfg.decoder.in_channels = cfg.feature_extractor.left_hidden_channels[-1] + cfg.feature_extractor.right_hidden_channels[-1] + cfg.encoder.fe_fc_dimension
-        print(cfg.decoder.in_channels)
         decoder = PredictionRefinement(
             in_channels= cfg.decoder.in_channels,
             out_channels= cfg.decoder.out_channels,
@@ -174,7 +183,13 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
             scale_factor= cfg.decoder.scale_factor,
             mode= cfg.decoder.mode
         )
-
+    elif cfg.decoder.name == 'cnn_transformer':
+        decoder = cnn_transformer(
+            input_dimension= cfg.encoder.input_dimension,
+            num_layers= cfg.decoder.num_layers,
+            nheads= cfg.decoder.nheads,
+            dropout= cfg.decoder.dropout,
+        )
     else:
         raise ValueError(f"Invalid decoder name: {cfg.decoder.name}")
 
@@ -209,6 +224,18 @@ def get_model(cfg: DictConfig, feature_dim: int, n_classes: int, num_timesteps: 
         encoder = get_encoder(cfg, feature_extractor)
         decoder = get_decoder(cfg, None, n_classes, num_timesteps)
         model = PrecTime(
+            feature_extractor=feature_extractor,
+            encoder=encoder,
+            decoder=decoder,
+            cfg = cfg,
+            mixup_alpha=cfg.augmentation.mixup_alpha,
+            cutmix_alpha=cfg.augmentation.cutmix_alpha,
+        )
+    elif cfg.model.name == "Combined":
+        feature_extractor = get_feature_extractor(cfg, feature_dim, num_timesteps)
+        encoder = get_encoder(cfg, feature_extractor)
+        decoder = get_decoder(cfg, None, n_classes, num_timesteps)
+        model = Combined(
             feature_extractor=feature_extractor,
             encoder=encoder,
             decoder=decoder,

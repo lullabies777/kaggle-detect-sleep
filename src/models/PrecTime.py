@@ -49,6 +49,7 @@ class PrecTime(nn.Module):
         do_cutmix: bool = False):
         origin_x = x
         #print(f"input shape is: {origin_x.shape}")
+        #input : (batch, features, length)
         if x.shape[-1] % self.cfg.chunks != 0:
             raise ValueError(f"Sequence_Length Should be Divided by Num_Chunks, Sequence_Length is {x.shape[-1]}")
             
@@ -63,11 +64,15 @@ class PrecTime(nn.Module):
         #print("The shape put into feature extraction:", x.shape)
         features_combined = self.feature_extractor(x) # (batzh*chunks, features, length)
         #print("The shape of concat output:", features_combined.shape)
-        features_combined_flat = features_combined.view(origin_x.shape[0], self.cfg.chunks,-1) # (batzh, chunks, features * length)
+        
+        #每个chunks的features
+        features_combined_flat = features_combined.view(origin_x.shape[0], self.cfg.chunks,-1) # (batzh, chunks, features)
         #print("The shape after the flatten of concat output:",features_combined_flat.shape)
         
-        features_combined_flat = self.fc_after_fe(features_combined_flat) # (batzh, chunks, features * length)
+        features_combined_flat = self.fc_after_fe(features_combined_flat) # (batzh, chunks, features)
         #print("The shape after using fc to reduce dimension:",features_combined_flat.shape)
+        
+        #捕捉chunks之间的关系
         output1, di = self.encoder(features_combined_flat) # (batch, features, length)
         #print(f"The first output is {output1.shape}")
         #print(f"di is {di.shape}")
@@ -82,14 +87,17 @@ class PrecTime(nn.Module):
         #print("The shape after prediction refinement:", final_output.shape)
         final_output = self.fc_final(final_output.permute(0, 2, 1)) # (batch, length, n_classes)
         #print("The final shape after fc:", final_output.shape)
-
+        
         logits = final_output
+        logits1 = output1
         # reduce overlap_interval 
         #print(f"logist shape is {logits.shape}") 
         logits = logits[:, (self.cfg.overlap_interval) : logits.shape[1] - (self.cfg.overlap_interval), :]
+        logits1 = logits1[:, (self.cfg.overlap_interval) : logits1.shape[1] - (self.cfg.overlap_interval), :]
         #print(f"labels shape is {labels.shape}")
         output = {"logits": logits}
         if labels is not None:
+            #labels = labels[:,:,1:]
             assert logits.shape == labels.shape, f"logits shape: {logits.shape}, labels shape: {labels.shape}"
             
             weight = labels.clone() * self.cfg.loss.weight 
@@ -105,7 +113,7 @@ class PrecTime(nn.Module):
                 loss = self.loss_fn(logits.log(), labels)
                     
             else:
-                loss = self.loss_fn(logits, labels)
+                loss = (self.loss_fn(logits, labels) + self.loss_fn(logits1, labels)) /2 
 
             loss = loss * weight 
             

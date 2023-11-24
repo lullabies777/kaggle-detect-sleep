@@ -147,6 +147,7 @@ class ContextDetection(nn.Module):
         output1 = left(x)
 
         di = x.permute(0, 2, 1)
+        #print(f"before up sample is {di.shape}")
         di = self.inter_upsample_di(di)
         return output1, di
 

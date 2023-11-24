@@ -1,0 +1,5 @@
+name: cnn_transformer
+input_dimension: 0 # auto
+num_layers: 2
+nheads: 8
+dropout: 0.1

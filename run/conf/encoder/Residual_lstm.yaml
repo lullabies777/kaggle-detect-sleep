@@ -1,0 +1,5 @@
+name: Residual_lstm
+input_dimension: 128 # auto
+num_layers: 3
+dropout: 0.5
+names : 'lstm'

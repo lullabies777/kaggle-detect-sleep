@@ -7,5 +7,5 @@ n_head: 2
 dropout: 0.1
 num_encoder_layers: 2
 dim_feedforward: 512
-encoder_type: 'transformer'
+encoder_type: 'lstm'
 activation: 'relu'

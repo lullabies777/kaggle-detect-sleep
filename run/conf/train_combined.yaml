@@ -12,15 +12,15 @@ hydra:
 defaults:
   - _self_
   - dir: local
-  - model: PrecTime
+  - model: Combined
   - feature_extractor: PrecFeatureExtractor
-  - decoder: PredictionRefinement
-  - encoder: ContextDetection
+  - decoder: cnn_transformer
+  - encoder: Residual_lstm
   - split: fold_1
 
 seed: 42
 exp_name: dummy
-duration: 7200 # duration * 5 = 秒数
+duration: 5760 # duration * 5 = 秒数
 downsample_rate: 1
 upsample_rate: 1
 overlap_interval: 720
@@ -33,7 +33,7 @@ chunks: 480
 num_classes: 3
 
 # training
-epoch: 120
+epoch: 150
 batch_size: 16
 num_workers: 16
 accelerator: auto
@@ -86,7 +86,7 @@ features:
 
 # optimizer
 optimizer:
-  lr: 3e-4
+  lr: 5e-4
 
 # scheduler
 scheduler:

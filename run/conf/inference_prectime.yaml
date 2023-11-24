@@ -1,7 +1,7 @@
 # ---------- Overriding hydra default configs ----------
 hydra:
   job:
-    name: train
+    name: inference
     chdir: true
   run:
     dir: ${dir.output_dir}/${hydra.job.name}/${exp_name}/single
@@ -16,39 +16,28 @@ defaults:
   - feature_extractor: PrecFeatureExtractor
   - decoder: PredictionRefinement
   - encoder: ContextDetection
-  - split: fold_1
+
+exp_name: dummy
+phase: test
+weight:
+  exp_name: ${exp_name}
+  run_name: single
 
 seed: 42
-exp_name: dummy
-duration: 7200 # duration * 5 = 秒数
-downsample_rate: 1
+duration: 7200 # durationは32の倍数
+downsample_rate: 1 # durationをdownsample_rateで割った値がnum_framesになる
 upsample_rate: 1
-overlap_interval: 720
-
-#For model
-#sequence_length : duration + 2 * overlap_interval
-# 需要满足： (duration + 2 * overlap_interval) / chunks 是偶数
-sequence_length: 0
-chunks: 480
-num_classes: 3
-
-# training
-epoch: 120
 batch_size: 16
-num_workers: 16
-accelerator: auto
+num_workers: 2
 use_amp: true
-debug: false
-gradient_clip_val: 1.0
-accumulate_grad_batches: 1
-monitor: val_score2
-monitor_mode: max
-check_val_every_n_epoch: 1
+overlap_interval: 720
+weight_dir: ./
+config_dir: ./
+suffix: 0
 
-# Dataset
-offset: 30
-sigma: 20
-bg_sampling_rate: 0.5
+sequence_length: 0
+chunks: 240
+num_classes: 3
 
 # augmentation
 augmentation:
@@ -56,14 +45,15 @@ augmentation:
   mixup_alpha: 0.4
   cutmix_prob: 0.0
   cutmix_alpha: 0.4
-  
+
 # post_process
 post_process:
   score_th: 0.02
   distance: 10
-  gap: 120
-  quantile: 0.7
-
+  gap: 180
+  quantile: 0.9
+  version: v2
+  
 # label
 labels:
   - "awake"
@@ -79,22 +69,14 @@ features:
   # - "month_cos"
   - "hour_sin"
   - "hour_cos"
-  #- "minute_sin"
-  #- "minute_cos"
-  #- "anglez_sin"
-  #- "anglez_cos"
+  # - "minute_sin"
+  # - "minute_cos"
+  # - "anglez_sin"
+  # - "anglez_cos"
 
-# optimizer
-optimizer:
-  lr: 3e-4
-
-# scheduler
-scheduler:
-  num_warmup_steps: 0.2
-  
 # criterion
 loss:
   name: "bce"
   alpha: 1.0
   gamma: 2.0
-  weight: 1
+  weight: 0
