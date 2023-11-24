@@ -83,6 +83,7 @@ def main(cfg: DictConfig):  # type: ignore
         sync_batchnorm=True,
         #val_check_interval=0.5,
         check_val_every_n_epoch=3,
+        strategy='ddp_find_unused_parameters_true',
     )
 
     trainer.fit(model, datamodule=datamodule)

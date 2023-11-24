@@ -1,3 +1,5 @@
+import sys
+sys.path.append('./')
 from tqdm import tqdm
 from omegaconf import DictConfig
 import polars as pl
@@ -6,8 +8,6 @@ import hydra
 from pathlib import Path
 import shutil
 from src.utils.common import trace
-import sys
-sys.path.append('./')
 
 window_steps = [12, 24, 36, 48, 60]
 shift_start = -24
@@ -32,6 +32,7 @@ for i in window_steps:
         new_feature_names.append(new_enmo_feature)
 
 print(new_feature_names)
+# 'anglez_lag_-24', 'enmo_lag_-24', 'anglez_lag_-12', 'enmo_lag_-12', 'anglez_lag_12', 'enmo_lag_12', 'anglez_min_12', 'enmo_min_12', 'anglez_max_12', 'enmo_max_12', 'anglez_std_12', 'enmo_std_12', 'anglez_mean_12', 'enmo_mean_12', 'anglez_min_24', 'enmo_min_24', 'anglez_max_24', 'enmo_max_24', 'anglez_std_24', 'enmo_std_24', 'anglez_mean_24', 'enmo_mean_24', 'anglez_min_36', 'enmo_min_36', 'anglez_max_36', 'enmo_max_36', 'anglez_std_36', 'enmo_std_36', 'anglez_mean_36', 'enmo_mean_36', 'anglez_min_48', 'enmo_min_48', 'anglez_max_48', 'enmo_max_48', 'anglez_std_48', 'enmo_std_48', 'anglez_mean_48', 'enmo_mean_48', 'anglez_min_60', 'enmo_min_60', 'anglez_max_60', 'enmo_max_60', 'anglez_std_60', 'enmo_std_60', 'anglez_mean_60', 'enmo_mean_60'
 
 SERIES_SCHEMA = {
     "series_id": pl.Utf8,
