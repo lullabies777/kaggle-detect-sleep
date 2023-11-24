@@ -27,17 +27,6 @@ class PrecTime(nn.Module):
             (self.cfg.sequence_length // self.cfg.chunks // 2), self.cfg.encoder.fe_fc_dimension
         )
 
-        self.inter_upsample = nn.Upsample(
-            scale_factor=cfg.sequence_length // cfg.chunks,
-            mode='nearest'
-        )
-        self.inter_fc = nn.Linear(in_features=256, out_features=3)
-
-        self.inter_upsample_di = nn.Upsample(
-            scale_factor=cfg.sequence_length // cfg.chunks // 2,
-            mode='nearest'
-        )
-
         self.fc_final = nn.Linear(self.cfg.decoder.out_channels, self.cfg.num_classes)
         self.loss_fn = get_loss(cfg)
 
