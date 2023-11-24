@@ -4,6 +4,24 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
+
+class ResidualLSTM(nn.Module):
+
+    def __init__(self, d_model):
+        super(ResidualLSTM, self).__init__()
+        self.LSTM=nn.LSTM(d_model, d_model, num_layers=1, bidirectional=True)
+        self.linear1=nn.Linear(d_model*2, d_model*4)
+        self.linear2=nn.Linear(d_model*4, d_model)
+
+
+    def forward(self, x):
+        res=x
+        x, _ = self.LSTM(x)
+        x=F.relu(self.linear1(x))
+        x=self.linear2(x)
+        x=res+x
+        return x
+
 def transformer_encoder_model(
     d_model=512,
     nhead=8,
@@ -69,6 +87,7 @@ class ContextDetection(nn.Module):
         dim_feedforward: int,
         encoder_type: str,
         activation: str,
+        r_lstm_layers: int,
         sequence_length,
         chunks
     ):
@@ -110,6 +129,12 @@ class ContextDetection(nn.Module):
             self.context_detection = nn.Sequential(*context_detection)
             self.encoder_output_dimension = self.lstm_dimensions[-1] * 2
             
+        if encoder_type == "r_lstm":
+            self.context_detection = nn.ModuleList([ResidualLSTM(fe_fc_dimension) for i in range(r_lstm_layers)])
+            self.pos_encoder_dropout = nn.Dropout(dropout)
+            self.layer_normal = nn.LayerNorm(fe_fc_dimension)
+            self.encoder_output_dimension = fe_fc_dimension
+            
         if encoder_type == "transformer":
             # 中间Transformer层
             self.transformer_encoder = transformer_encoder_model(
@@ -142,6 +167,16 @@ class ContextDetection(nn.Module):
             for layer in self.context_detection:
                 x, _ = layer(x)  #(output, (h_n, c_n))
                 #print(f"layer output is {x.shape}")
+        elif self.encoder_type  == "r_lstm":
+            # (batch, length, features) - > (length, batch, features)
+            x = x.permute(1,0,2)
+            for lstm in self.context_detection:
+                lstm.LSTM.flatten_parameters()
+                x=lstm(x)
+            x = self.pos_encoder_dropout(x)
+            x = self.layer_normal(x)
+            # (length, batch, features) - > (batch, length, features)
+            x = x.permute(1,0,2)
                 
         left = LeftBranch(upsample = self.inter_upsample, fc = self.inter_fc)
         output1 = left(x)
