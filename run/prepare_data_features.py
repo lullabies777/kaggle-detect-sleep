@@ -17,12 +17,12 @@ shift_step = 12
 new_feature_names = []
 
 
-for i in range(shift_start, shift_end, shift_step):
-    if i != 0:
-        name_anglez = f"anglez_lag_{i}"
-        new_feature_names.append(name_anglez)
-        name_enmo = f"enmo_lag_{i}"
-        new_feature_names.append(name_enmo)
+# for i in range(shift_start, shift_end, shift_step):
+#     if i != 0:
+#         name_anglez = f"anglez_lag_{i}"
+#         new_feature_names.append(name_anglez)
+#         name_enmo = f"enmo_lag_{i}"
+#         new_feature_names.append(name_enmo)
 
 for i in window_steps:
     for metric in ["min", "max", "std", "mean"]:
@@ -208,6 +208,15 @@ def main(cfg: DictConfig):
                     f"enmo_max_{window_size}") for window_size in window_steps],
                 *[pl.col("enmo").rolling_std(window_size).alias(
                     f"enmo_std_{window_size}") for window_size in window_steps],
+            ])
+            .explode([
+                "anglez", "enmo", "timestamp", "anglez_rad",
+                # *[f"anglez_lag_{i}" for i in range(shift_start, shift_end, shift_step) if i != 0],
+                # *[f"enmo_lag_{i}" for i in range(shift_start, shift_end, shift_step) if i != 0],
+                *[f"anglez_{stat}_{window_size}" for stat in
+                  ["mean", "min", "max", "std"] for window_size in window_steps],
+                *[f"enmo_{stat}_{window_size}" for stat in
+                  ["mean", "min", "max", "std"] for window_size in window_steps],
             ])
             .collect(streaming=True)
             .sort(by=["series_id", "timestamp"])
