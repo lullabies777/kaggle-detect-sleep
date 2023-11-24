@@ -36,7 +36,7 @@ config_dir: ./
 suffix: 0
 
 sequence_length: 0
-chunks: 240
+chunks: 180
 num_classes: 3
 
 # augmentation
