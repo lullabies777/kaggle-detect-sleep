@@ -1,3 +1,5 @@
+import sys
+sys.path.append('./')
 from src.utils.common import trace
 import shutil
 from pathlib import Path
@@ -6,8 +8,6 @@ import numpy as np
 import polars as pl
 from omegaconf import DictConfig
 from tqdm import tqdm
-import sys
-sys.path.append('./')
 
 window_steps = [12, 24, 36, 48, 60]
 shift_start = -24
