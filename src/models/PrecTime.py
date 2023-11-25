@@ -6,7 +6,24 @@ import torch.nn as nn
 from src.augmentation.cutmix import Cutmix
 from src.augmentation.mixup import Mixup
 from src.models.losses import get_loss
+import torch.nn.functional as F
+class ResidualLSTM(nn.Module):
 
+    def __init__(self, d_model):
+        super(ResidualLSTM, self).__init__()
+        self.LSTM=nn.LSTM(d_model, d_model, num_layers=1, bidirectional=True)
+        self.linear1=nn.Linear(d_model*2, d_model*4)
+        self.linear2=nn.Linear(d_model*4, d_model)
+
+
+    def forward(self, x):
+        res=x
+        x, _ = self.LSTM(x)
+        x=F.relu(self.linear1(x))
+        x=self.linear2(x)
+        x=res+x
+        return x
+    
 class PrecTime(nn.Module):
     def __init__(
         self,
@@ -40,7 +57,12 @@ class PrecTime(nn.Module):
 
         self.fc_final = nn.Linear(self.cfg.decoder.out_channels, self.cfg.num_classes)
         self.loss_fn = get_loss(cfg)
-
+        
+        # input_dimension = len(cfg.features)
+        # self.pos_encoder = nn.ModuleList([ResidualLSTM(input_dimension) for i in range(2)])
+        # self.pos_encoder_dropout = nn.Dropout(0.5)
+        # self.layer_normal = nn.LayerNorm(input_dimension)
+        
     def forward(
         self, 
         x: torch.Tensor,
@@ -56,11 +78,18 @@ class PrecTime(nn.Module):
         if (x.shape[-1] / self.cfg.chunks) % 2 != 0:
             raise ValueError(f"Sequence_Length Divided by Num_Chunks should be 2 times X, "
                      f"Sequence_Length Divided by Num_Chunks is {x.shape[-1]} / {self.cfg.chunks} = {x.shape[-1] / self.cfg.chunks}")
-
+    
         x = x.transpose(0, 1).reshape(
             x.shape[1], -1, x.shape[2] // self.cfg.chunks
         ).transpose(0, 1) # (batzh*chunks, features, seq_length//chunks)
-
+        
+        # x=x.permute(2,0,1)# ( seq_length//chunks,batzh*chunks, features)
+        # for lstm in self.pos_encoder:
+        #     lstm.LSTM.flatten_parameters()
+        #     x=lstm(x)
+        # x = self.pos_encoder_dropout(x)
+        # x = self.layer_normal(x)
+        # x = x.permute(1,2,0)
         #print("The shape put into feature extraction:", x.shape)
         features_combined = self.feature_extractor(x) # (batzh*chunks, features, length)
         #print("The shape of concat output:", features_combined.shape)
@@ -95,7 +124,7 @@ class PrecTime(nn.Module):
         logits = logits[:, (self.cfg.overlap_interval) : logits.shape[1] - (self.cfg.overlap_interval), :]
         logits1 = logits1[:, (self.cfg.overlap_interval) : logits1.shape[1] - (self.cfg.overlap_interval), :]
         #print(f"labels shape is {labels.shape}")
-        output = {"logits": logits}
+        output = {"logits": logits*0.8 + logits1*0.2}
         if labels is not None:
             #labels = labels[:,:,1:]
             assert logits.shape == labels.shape, f"logits shape: {logits.shape}, labels shape: {labels.shape}"
@@ -113,7 +142,7 @@ class PrecTime(nn.Module):
                 loss = self.loss_fn(logits.log(), labels)
                     
             else:
-                loss = (self.loss_fn(logits, labels) + self.loss_fn(logits1, labels)) /2 
+                loss = self.loss_fn(logits, labels)*0.8 + self.loss_fn(logits1, labels) * 0.2
 
             loss = loss * weight 
             
