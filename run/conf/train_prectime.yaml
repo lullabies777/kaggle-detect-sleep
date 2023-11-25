@@ -89,6 +89,8 @@ features:
   # - "enmo_lag_-12"
   # - "anglez_lag_12"
   # - "enmo_lag_12"
+  # - "anglez_lag_24"
+  # - "enmo_lag_24"
   - "anglez_min_12"
   - "enmo_min_12"
   - "anglez_max_12"
