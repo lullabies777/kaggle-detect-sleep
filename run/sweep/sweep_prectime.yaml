@@ -30,3 +30,4 @@ command:
 - ${program}
 - ${args_no_hyphens}
 - exp_name=Prectime
+- epoch=300
