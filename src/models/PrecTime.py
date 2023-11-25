@@ -113,7 +113,8 @@ class PrecTime(nn.Module):
         logits = logits[:, (self.cfg.overlap_interval) : logits.shape[1] - (self.cfg.overlap_interval), :]
         logits1 = logits1[:, (self.cfg.overlap_interval) : logits1.shape[1] - (self.cfg.overlap_interval), :]
         #print(f"labels shape is {labels.shape}")
-        output = {"logits": logits*0.8 + logits1*0.2}
+        output = {"logits": logits}
+        #{"logits": logits*0.9 + logits1*0.1}
         if labels is not None:
             #labels = labels[:,:,1:]
             assert logits.shape == labels.shape, f"logits shape: {logits.shape}, labels shape: {labels.shape}"
@@ -131,7 +132,7 @@ class PrecTime(nn.Module):
                 loss = self.loss_fn(logits.log(), labels)
                     
             else:
-                loss = self.loss_fn(logits, labels)*0.8 + self.loss_fn(logits1, labels) * 0.2
+                loss = self.loss_fn(logits, labels)*0.5 + self.loss_fn(logits1, labels) * 0.5
 
             loss = loss * weight 
             

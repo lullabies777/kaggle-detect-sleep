@@ -7,6 +7,12 @@ metric:
 
 method: grid
 parameters:
+    duration:
+        values: [7200]
+    overlap_interval:
+        values: [720]
+    chunks: 
+        values: [240,480,1440]
     feature_extractor.left_hidden_channels:
         values: [[128,128,128,128],[64,64,128,128],[64,64,128,256]]
     feature_extractor.right_hidden_channels:
@@ -16,7 +22,7 @@ parameters:
     encoder.lstm_dimensions:
         values: [[128, 256]]
     decoder.out_channels:
-        values: [64, 128]
+        values: [128]
         
 command:
 - ${env}
