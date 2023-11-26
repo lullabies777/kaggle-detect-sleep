@@ -10,4 +10,4 @@ left_fe_stride: 1
 right_fe_stride: 1
 left_fe_dilation: 1
 right_fe_dilation: 4
-cnn_name: 'r_cnn1d'
+cnn_name: 'r_conv1d'

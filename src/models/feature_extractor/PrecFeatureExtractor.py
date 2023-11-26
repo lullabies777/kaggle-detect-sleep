@@ -136,7 +136,7 @@ class PrecFeatureExtractor(nn.Module):
                 dropout=True
             )]
         )
-        if cnn_name == 'cnn1d':
+        if cnn_name == 'conv1d':
             for i in range(self.fe1_layers - 1): 
                 feature_extraction1_layer.extend([
                     conv1d_block(
@@ -149,7 +149,7 @@ class PrecFeatureExtractor(nn.Module):
                     )
                 ])
         
-        if cnn_name == 'r_cnn1d':
+        if cnn_name == 'r_conv1d':
             for i in range(1, len(left_hidden_channels)):
                 feature_extraction1_layer.append(ResidualBlock(
                     self.left_hidden_channels[i - 1], self.left_hidden_channels[i], self.left_fe_kernel_size, self.left_fe_stride, self.left_fe_padding, self.left_fe_dilation))
@@ -172,7 +172,7 @@ class PrecFeatureExtractor(nn.Module):
                 dropout=True
             )]
         )
-        if cnn_name == 'cnn1d':
+        if cnn_name == 'conv1d':
             for i in range(self.fe2_layers - 1):
                 feature_extraction2_layer.extend([
                     conv1d_block(
@@ -185,7 +185,7 @@ class PrecFeatureExtractor(nn.Module):
                     )
                 ])
 
-        if cnn_name == 'r_cnn1d':
+        if cnn_name == 'r_conv1d':
             for i in range(1, len(right_hidden_channels)):
                 feature_extraction2_layer.append(ResidualBlock(
                     self.right_hidden_channels[i - 1], self.right_hidden_channels[i], self.right_fe_kernel_size, self.right_fe_stride, self.right_fe_padding, self.right_fe_dilation))

@@ -185,7 +185,8 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
             stride= cfg.decoder.stride,
             dilation= cfg.decoder.dilation,
             scale_factor= cfg.decoder.scale_factor,
-            mode= cfg.decoder.mode
+            mode= cfg.decoder.mode,
+            cnn_name= cfg.decoder.cnn_name
         )
     elif cfg.decoder.name == 'cnn_transformer':
         decoder = cnn_transformer(
