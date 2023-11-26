@@ -4,9 +4,9 @@ lstm_dimensions: [100,200]
 num_layers: -1 
 bidirectional: [True,True]
 n_head: 2
-dropout: 0.1
+dropout: 0.5
 num_encoder_layers: 2
 dim_feedforward: 512
-encoder_type: 'lstm'
+encoder_type: 'r_lstm'
 activation: 'relu'
 r_lstm_layers: 3

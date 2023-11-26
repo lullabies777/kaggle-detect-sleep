@@ -86,7 +86,8 @@ def get_feature_extractor(
             left_fe_stride=cfg.feature_extractor.left_fe_stride,
             right_fe_stride=cfg.feature_extractor.right_fe_stride,
             left_fe_dilation=cfg.feature_extractor.left_fe_dilation,
-            right_fe_dilation=cfg.feature_extractor.right_fe_dilation
+            right_fe_dilation=cfg.feature_extractor.right_fe_dilation,
+            cnn_name=cfg.feature_extractor.cnn_name
         )
     else:
         raise ValueError(f"Invalid feature extractor name: {cfg.feature_extractor.name}")
