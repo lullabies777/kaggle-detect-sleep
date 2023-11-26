@@ -17,12 +17,12 @@ shift_step = 12
 new_feature_names = []
 
 
-for i in range(shift_start, shift_end, shift_step):
-    if i != 0:
-        name_anglez = f"anglez_lag_{i}"
-        new_feature_names.append(name_anglez)
-        name_enmo = f"enmo_lag_{i}"
-        new_feature_names.append(name_enmo)
+# for i in range(shift_start, shift_end, shift_step):
+#     if i != 0:
+#         name_anglez = f"anglez_lag_{i}"
+#         new_feature_names.append(name_anglez)
+#         name_enmo = f"enmo_lag_{i}"
+#         new_feature_names.append(name_enmo)
 
 for i in window_steps:
     for metric in ["min", "max", "std", "mean"]:
