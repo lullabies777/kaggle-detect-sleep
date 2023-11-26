@@ -100,10 +100,10 @@ def save_each_series(this_series_df: pl.DataFrame, columns: list[str], output_di
 def main(cfg: DictConfig):
     processed_dir: Path = Path(cfg.dir.processed_dir) / cfg.phase
 
-    # ディレクトリが存在する場合は削除
-    if processed_dir.exists():
-        shutil.rmtree(processed_dir)
-        print(f"Removed {cfg.phase} dir: {processed_dir}")
+    # # ディレクトリが存在する場合は削除
+    # if processed_dir.exists():
+    #     shutil.rmtree(processed_dir)
+    #     print(f"Removed {cfg.phase} dir: {processed_dir}")
 
     with trace("Load series"):
         # scan parquet
