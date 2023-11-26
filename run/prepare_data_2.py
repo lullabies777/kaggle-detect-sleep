@@ -1,3 +1,5 @@
+import sys
+sys.path.append('./')
 from src.utils.common import trace
 import shutil
 from pathlib import Path
@@ -6,10 +8,8 @@ import numpy as np
 import polars as pl
 from omegaconf import DictConfig
 from tqdm import tqdm
-import sys
-sys.path.append('./')
 
-window_steps = [12, 24]
+window_steps = [24, 36]
 shift_start = -24
 shift_end = 36
 shift_step = 12
@@ -17,12 +17,12 @@ shift_step = 12
 new_feature_names = []
 
 
-# for i in range(shift_start, shift_end, shift_step):
-#     if i != 0:
-#         name_anglez = f"anglez_lag_{i}"
-#         new_feature_names.append(name_anglez)
-#         name_enmo = f"enmo_lag_{i}"
-#         new_feature_names.append(name_enmo)
+for i in range(shift_start, shift_end, shift_step):
+    if i != 0:
+        name_anglez = f"anglez_lag_{i}"
+        new_feature_names.append(name_anglez)
+        name_enmo = f"enmo_lag_{i}"
+        new_feature_names.append(name_enmo)
 
 for i in window_steps:
     for metric in ["min", "max", "std", "mean"]:
