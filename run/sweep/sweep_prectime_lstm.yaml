@@ -12,7 +12,7 @@ parameters:
     overlap_interval:
         values: [720]
     chunks: 
-        values: [240,480,1440]
+        values: [240, 480]
     feature_extractor.left_hidden_channels:
         values: [[128,128,128,128],[64,64,128,128],[64,64,128,256]]
     feature_extractor.right_hidden_channels:

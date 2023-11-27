@@ -83,14 +83,14 @@ features:
   # - "minute_cos"
   # - "anglez_sin"
   # - "anglez_cos"
-  - "anglez_lag_-24"
-  - "enmo_lag_-24"
-  - "anglez_lag_-12"
-  - "enmo_lag_-12"
-  - "anglez_lag_12"
-  - "enmo_lag_12"
-  - "anglez_lag_24"
-  - "enmo_lag_24"
+  # - "anglez_lag_-24"
+  # - "enmo_lag_-24"
+  # - "anglez_lag_-12"
+  # - "enmo_lag_-12"
+  # - "anglez_lag_12"
+  # - "enmo_lag_12"
+  # - "anglez_lag_24"
+  # - "enmo_lag_24"
   - "anglez_min_12"
   - "enmo_min_12"
   - "anglez_max_12"
@@ -125,16 +125,16 @@ features:
   # - "enmo_mean_48"
   # - "anglez_min_60"
   # - "enmo_min_60"
-  - "anglez_max_60"
-  - "enmo_max_60"
-  - "anglez_std_60"
-  - "enmo_std_60"
-  - "anglez_mean_60"
-  - "enmo_mean_60"
+  # - "anglez_max_60"
+  # - "enmo_max_60"
+  # - "anglez_std_60"
+  # - "enmo_std_60"
+  # - "anglez_mean_60"
+  # - "enmo_mean_60"
 
 # optimizer
 optimizer:
-  lr: 3e-4
+  lr: 5e-4
 
 # scheduler
 scheduler:
