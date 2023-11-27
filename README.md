@@ -28,7 +28,7 @@
 This repository is for [Child Mind Institute - Detect Sleep States](https://www.kaggle.com/competitions/child-mind-institute-detect-sleep-states/overview)
 
 ## Build Environment
-### 1. install [rye](https://github.com/mitsuhiko/rye)
+### 1. Install [rye](https://github.com/mitsuhiko/rye) (Not necessary)
 
 [install documentation](https://rye-up.com/guide/installation/#installing-rye)
 
@@ -65,16 +65,23 @@ rye sync
 Rewrite run/conf/dir/local.yaml to match your environment
 
 ```yaml
-data_dir: 
-processed_dir: 
-output_dir: 
-model_dir: 
+data_dir: /kaggle-detect-sleep/data
+processed_dir: /kaggle-detect-sleep/data/processed_data
+output_dir: /kaggle-detect-sleep/output
+model_dir: /kaggle-detect-sleep/output/train
 sub_dir: ./
 ```
 
 ## Prepare Data
 
-### 1. Download data
+### 1. Set kaggle environment
+
+```bash
+export KAGGLE_USERNAME=your_kaggle_username
+export KAGGLE_KEY=your_api_key
+```
+
+### 2. Download data
 
 ```bash
 cd data
@@ -85,20 +92,30 @@ unzip child-mind-institute-detect-sleep-states.zip
 ### 2. Preprocess data
 
 ```bash
-rye run python -m run/prepare_data.py phase=train,test
+python run/prepare_data.py phase=train,test
 ```
 
 ## Train Model
-The following commands are for training the model of LB0.714
+-  **Basic Model**
 ```bash
-rye run python run/train.py downsample_rate=2 duration=5760 exp_name=exp001 batch_size=32
+python run/train.py downsample_rate=2 duration=5760 exp_name=exp001 batch_size=32
 ```
 
 You can easily perform experiments by changing the parameters because [hydra](https://hydra.cc/docs/intro/) is used.
 The following commands perform experiments with downsample_rate of 2, 4, 6, and 8.
 
 ```bash
-rye run python -m run/train.py downsample_rate=2,4,6,8
+python run/train.py downsample_rate=2,4,6,8
+```
+
+-  **PrecTime Model**
+```bash
+python run/train_prectime.py
+```
+-  **Select sweep yaml**
+```bash
+sweep_prectime_lstm.yaml
+sweep_prectime_r_lstm.yaml
 ```
 
 
