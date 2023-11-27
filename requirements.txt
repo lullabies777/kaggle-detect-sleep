@@ -1,0 +1,11 @@
+pytorch_lightning
+hydra-core
+polars
+kaggle
+rich == 13.7.0
+pyarrow
+pandas
+transformers
+segmentation_models_pytorch
+scipy
+wandb
