@@ -27,8 +27,8 @@
 
 This repository is for [Child Mind Institute - Detect Sleep States](https://www.kaggle.com/competitions/child-mind-institute-detect-sleep-states/overview)
 
-## Build Environment
-### 1. Install [rye](https://github.com/mitsuhiko/rye) (Not necessary)
+## Build Environment (Not necessary)
+### 1. Install [rye](https://github.com/mitsuhiko/rye)
 
 [install documentation](https://rye-up.com/guide/installation/#installing-rye)
 
@@ -61,7 +61,7 @@ rye sync
 . .venv/bin/activate
 ```
 
-### Set path
+## Set path
 Rewrite run/conf/dir/local.yaml to match your environment
 
 ```yaml
