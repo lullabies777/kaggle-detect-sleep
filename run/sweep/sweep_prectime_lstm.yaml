@@ -14,9 +14,9 @@ parameters:
     chunks: 
         values: [240, 480]
     feature_extractor.left_hidden_channels:
-        values: [[128,128,128,128],[64,64,128,128],[64,64,128,256]]
+        values: [[64, 64, 64, 64], [64, 64, 64, 64, 64], [64, 64, 64, 64, 64, 64]]
     feature_extractor.right_hidden_channels:
-        values: [[128,128,128,128],[64,64,128,128],[64,64,128,256]]
+        values: [[64, 64, 64, 64], [64, 64, 64, 64, 64], [64, 64, 64, 64, 64, 64]]
     encoder.fe_fc_dimension:
         values: [64, 128]
     encoder.lstm_dimensions:
