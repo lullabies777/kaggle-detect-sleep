@@ -112,7 +112,7 @@ python run/train.py downsample_rate=2,4,6,8
 ```bash
 python run/train_prectime.py
 ```
--  **Select sweep yaml**
+You can select sweep yaml
 ```bash
 sweep_prectime_lstm.yaml
 sweep_prectime_r_lstm.yaml
