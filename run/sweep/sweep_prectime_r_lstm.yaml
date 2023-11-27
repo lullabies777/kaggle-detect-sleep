@@ -32,7 +32,7 @@ command:
 - ${program}
 - ${args_no_hyphens}
 - exp_name=Prectime_r_lstm
-- epoch=300
+- epoch=400
 - feature_extractor=PrecFeatureExtractor
 - decoder=PredictionRefinement
 - encoder=ContextDetection
