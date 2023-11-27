@@ -19,7 +19,7 @@ class cnn_transformer(nn.Module):
         deconv_layers = [nn.ConvTranspose1d(input_dimension,input_dimension,(num_layers-i)*2-1,stride=1,padding=0) for i in range(num_layers)]
         self.deconv_layers = nn.ModuleList(deconv_layers)
         
-        encoder_layers = [nn.TransformerEncoderLayer(input_dimension, nheads, input_dimension*4, dropout) for i in range(num_layers)]
+        encoder_layers = [nn.TransformerEncoderLayer(input_dimension, nheads, input_dimension*2, dropout) for i in range(num_layers)]
         self.transformer_encoder = nn.ModuleList(encoder_layers)
         
         layer_norm_layers = [nn.LayerNorm(input_dimension) for i in range(num_layers)]

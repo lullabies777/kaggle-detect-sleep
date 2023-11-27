@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from src.models.decoder.cnn_transformer import cnn_transformer
 def conv1d_block(
     in_channels,
     out_channels,
@@ -86,6 +86,8 @@ class PredictionRefinement(nn.Module):
         else:
             padding = (dilation * (kernel_size - 1)) // 2
             
+        self.cnn_name = cnn_name
+        
         if cnn_name == 'conv1d':
             self.prediction_refinement = nn.Sequential(
                 conv1d_block(
@@ -136,6 +138,15 @@ class PredictionRefinement(nn.Module):
                 ),
                 nn.Dropout(p=0.5)
             )
+        
+        elif cnn_name == 'cnn_transformer':
+            self.prediction_refinement = cnn_transformer(
+                input_dimension= in_channels,
+                num_layers= 2,
+                nheads= 8,
+                dropout= 0.5,
+            )
+        self.upsample = nn.Upsample(scale_factor=scale_factor, mode=mode)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -145,7 +156,15 @@ class PredictionRefinement(nn.Module):
         Returns:
             torch.Tensor: 
         """
-        return self.prediction_refinement(x)
+        if self.cnn_name == 'cnn_transformer':
+            # (batch, features, length) -> (length,batch, features)
+            x = x.permute(2,0,1)
+            x = self.prediction_refinement(x)
+            x = x.permute(1,2,0)
+            x = self.upsample(x)
+        else:
+            x = self.prediction_refinement(x)
+        return x
 
 
 # if __name__ == '__main__':

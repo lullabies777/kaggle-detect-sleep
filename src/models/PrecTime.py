@@ -45,6 +45,10 @@ class PrecTime(nn.Module):
         )
 
         self.fc_final = nn.Linear(self.cfg.decoder.out_channels, self.cfg.num_classes)
+        if self.cfg.decoder.cnn_name == 'cnn_transformer':
+            self.fc_final = nn.Linear(self.cfg.decoder.in_channels, self.cfg.num_classes)
+        else:
+            self.fc_final = nn.Linear(self.cfg.decoder.out_channels, self.cfg.num_classes)
         self.loss_fn = get_loss(cfg)
         
         # input_dimension = len(cfg.features)
