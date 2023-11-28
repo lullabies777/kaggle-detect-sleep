@@ -73,7 +73,7 @@ def main(cfg: DictConfig):  # type: ignore
         default_root_dir=Path.cwd(),
         # num_nodes=cfg.training.num_gpus,
         accelerator=cfg.accelerator,
-        precision=16 if cfg.use_amp else 32,
+        precision='16-mixed' if cfg.use_amp else 32,
         # training
         fast_dev_run=cfg.debug,  # run only 1 train batch and 1 val batch
         max_epochs=cfg.epoch,

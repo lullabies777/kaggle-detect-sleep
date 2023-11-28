@@ -16,7 +16,7 @@ defaults:
   - feature_extractor: PrecFeatureExtractor
   - decoder: PredictionRefinement
   - encoder: ContextDetection
-  - split: fold_1
+  - split: kfold_0
 
 seed: 42
 exp_name: prectime

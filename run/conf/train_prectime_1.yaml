@@ -33,7 +33,7 @@ chunks: 480
 num_classes: 3
 
 # training
-epoch: 180
+epoch: 120
 batch_size: 32
 num_workers: 16
 accelerator: auto
