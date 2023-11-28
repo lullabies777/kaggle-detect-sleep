@@ -19,7 +19,7 @@ defaults:
   - split: fold_1
 
 seed: 42
-exp_name: dummy
+exp_name: prectime
 duration: 7200 # duration * 5 = 秒数
 downsample_rate: 1
 upsample_rate: 1
