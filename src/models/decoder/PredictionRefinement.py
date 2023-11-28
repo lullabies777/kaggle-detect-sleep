@@ -77,6 +77,9 @@ class PredictionRefinement(nn.Module):
         dilation: int,
         scale_factor: int,
         mode: str,
+        num_layers: int,
+        n_heads: int,
+        dropout: int,
         cnn_name: str
     ):
         super(PredictionRefinement, self).__init__()

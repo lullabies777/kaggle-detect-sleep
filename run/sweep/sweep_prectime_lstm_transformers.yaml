@@ -12,29 +12,36 @@ parameters:
     overlap_interval:
         values: [720]
     chunks: 
-        values: [240, 480]
-    feature_extractor.left_hidden_channels:
-        values: [[64, 64, 64, 64], [64, 64, 64, 64, 64], [64, 64, 64, 64, 64, 64]]
+        values: [480]
     feature_extractor.right_hidden_channels:
-        values: [[64, 64, 64, 64], [64, 64, 64, 64, 64], [64, 64, 64, 64, 64, 64]]
+        values: [[64, 64, 128, 128, 128, 128], [64, 64, 128, 128, 128], [64, 64, 128, 128]]
+    feature_extractor.cnn_name:
+        values: ['r_conv1d']
     encoder.fe_fc_dimension:
-        values: [64, 128]
-    encoder.r_lstm_layers:
-        values: [3, 4]
+        values: [128, 256]
+    encoder.lstm_dimensions:
+        values: [[128, 256]]
     decoder.out_channels:
         values: [128]
     encoder.encoder_type:
-        values: ['r_lstm']
-        
+        values: ['lstm']
+    decoder.cnn_name:
+        values: ['cnn_transformer']
+    decoder.num_layers:
+        values: [2, 4]
+    decoder.n_heads:
+        values: [8, 16]
+    
 command:
 - ${env}
 - ${interpreter}
 - ${program}
 - ${args_no_hyphens}
-- exp_name=Prectime_r_lstm_sweep
-- epoch=400
+- exp_name=Prectime_sweep
+- epoch=300
 - feature_extractor=PrecFeatureExtractor
 - decoder=PredictionRefinement
 - encoder=ContextDetection
 - split=fold_1
 - optimizer.lr=5e-4
+- batch_size=32

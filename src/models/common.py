@@ -75,6 +75,7 @@ def get_feature_extractor(
             out_size=num_timesteps,
         )
     elif cfg.feature_extractor.name == "PrecFeatureExtractor":
+        cfg.feature_extractor.left_hidden_channels = cfg.feature_extractor.right_hidden_channels
         feature_extractor = PrecFeatureExtractor(
             input_channels=feature_dim,
             left_hidden_channels=cfg.feature_extractor.left_hidden_channels,
@@ -186,6 +187,9 @@ def get_decoder(cfg: DictConfig, n_channels: int, n_classes: int, num_timesteps:
             dilation= cfg.decoder.dilation,
             scale_factor= cfg.decoder.scale_factor,
             mode= cfg.decoder.mode,
+            num_layers= cfg.decoder.num_layers,
+            n_heads= cfg.decoder.n_heads,
+            dropout= cfg.decoder.dropout,
             cnn_name= cfg.decoder.cnn_name
         )
     elif cfg.decoder.name == 'cnn_transformer':
