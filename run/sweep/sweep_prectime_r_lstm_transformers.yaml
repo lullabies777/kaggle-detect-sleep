@@ -37,7 +37,7 @@ command:
 - ${interpreter}
 - ${program}
 - ${args_no_hyphens}
-- exp_name=Prectime_sweep
+- exp_name=Prectime_r_lstm_sweep_final
 - epoch=300
 - feature_extractor=PrecFeatureExtractor
 - decoder=PredictionRefinement
