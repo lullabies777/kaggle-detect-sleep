@@ -127,7 +127,10 @@ def make_submission(
 @hydra.main(config_path="conf", config_name="inference_prectime", version_base="1.2")
 def main(cfg: DictConfig):
     seed_everything(cfg.seed)
-
+    config = torch.load(cfg.config_dir)
+    cfg.duration = config.duration
+    cfg.overlap_interval = config.overlap_interval
+    cfg.features = config.features
     with trace("load test dataloader"):
         test_dataloader = get_test_dataloader(cfg)
     with trace("load model"):
@@ -143,6 +146,7 @@ def main(cfg: DictConfig):
             preds,
             cfg
         )
+    cfg.suffix = cfg.config_dir.split('/')[-2]
     sub_df.write_csv(Path(cfg.dir.sub_dir) / "submission.csv")
     np.save(Path(cfg.dir.sub_dir) / f"keys_{cfg.suffix}.npy", keys)
     np.save(Path(cfg.dir.sub_dir) / f"preds_{cfg.suffix}.npy", preds)
