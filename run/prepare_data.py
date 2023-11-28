@@ -1,17 +1,17 @@
+from tqdm import tqdm
+from omegaconf import DictConfig
+import polars as pl
+import numpy as np
+import hydra
+from pathlib import Path
+import shutil
+from src.utils.common import trace
 import sys
 sys.path.append('./')
-from src.utils.common import trace
-import shutil
-from pathlib import Path
-import hydra
-import numpy as np
-import polars as pl
-from omegaconf import DictConfig
-from tqdm import tqdm
 
 window_steps = [12, 24, 36, 48, 60]
-shift_start = -24
-shift_end = 36
+shift_start = 0
+shift_end = 0
 shift_step = 12
 
 new_feature_names = []
