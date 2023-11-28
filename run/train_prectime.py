@@ -1,27 +1,27 @@
-import argparse
-import wandb
-import os
-from time import gmtime, strftime
-from src.modelmodule.seg_prectime import SegModel_prectime
-from src.datamodule.seg import SegDataModule
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
-from pytorch_lightning.loggers import WandbLogger
+import sys
+sys.path.append('./')
+import yaml
+from pathlib import Path
+import logging
+import hydra
+import torch
+import omegaconf
+from omegaconf import DictConfig
+from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import (
     LearningRateMonitor,
     ModelCheckpoint,
     RichModelSummary,
     RichProgressBar,
 )
-from pytorch_lightning import Trainer, seed_everything
-from omegaconf import DictConfig
-import omegaconf
-import torch
-import hydra
-import logging
-from pathlib import Path
-import yaml
-import sys
-sys.path.append('./')
+from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.callbacks.early_stopping import EarlyStopping
+from src.datamodule.seg import SegDataModule
+from src.modelmodule.seg_prectime import SegModel_prectime
+from time import gmtime, strftime
+import os
+import wandb
+import argparse
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s:%(name)s - %(message)s"
