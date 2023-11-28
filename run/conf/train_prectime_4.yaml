@@ -1,0 +1,148 @@
+# ---------- Overriding hydra default configs ----------
+hydra:
+  job:
+    name: train
+    chdir: true
+  run:
+    dir: ${dir.output_dir}/${hydra.job.name}/${exp_name}/single
+  sweep:
+    dir: ${dir.output_dir}/${hydra.job.name}/${exp_name}
+    subdir: run${hydra.job.num}
+
+defaults:
+  - _self_
+  - dir: local
+  - model: PrecTime
+  - feature_extractor: PrecFeatureExtractor
+  - decoder: PredictionRefinement
+  - encoder: ContextDetection
+  - split: kfold_4
+
+seed: 42
+exp_name: prectime_kfold_4
+duration: 7200 # duration * 5 = 秒数
+downsample_rate: 1
+upsample_rate: 1
+overlap_interval: 720
+
+#For model
+#sequence_length : duration + 2 * overlap_interval
+# 需要满足： (duration + 2 * overlap_interval) / chunks 是偶数
+sequence_length: 0
+chunks: 480
+num_classes: 3
+
+# training
+epoch: 180
+batch_size: 16
+num_workers: 16
+accelerator: auto
+use_amp: true
+debug: false
+gradient_clip_val: 1.0
+accumulate_grad_batches: 1
+monitor: val_score2
+monitor_mode: max
+check_val_every_n_epoch: 1
+
+# Dataset
+offset: 30
+sigma: 20
+bg_sampling_rate: 0.5
+
+# augmentation
+augmentation:
+  mixup_prob: 0.0
+  mixup_alpha: 0.4
+  cutmix_prob: 0.0
+  cutmix_alpha: 0.4
+  
+# post_process
+post_process:
+  score_th: 0.02
+  distance: 10
+  gap: 120
+  quantile: 0.7
+
+# label
+labels:
+  - "awake"
+  - "event_onset"
+  - "event_wakeup"
+
+# feature
+features:
+  - "anglez"
+  - "enmo"
+  # - "step"
+  # - "month_sin"
+  # - "month_cos"
+  - "hour_sin"
+  - "hour_cos"
+  # - "minute_sin"
+  # - "minute_cos"
+  # - "anglez_sin"
+  # - "anglez_cos"
+  # - "anglez_lag_-24"
+  # - "enmo_lag_-24"
+  # - "anglez_lag_-12"
+  # - "enmo_lag_-12"
+  # - "anglez_lag_12"
+  # - "enmo_lag_12"
+  # - "anglez_lag_24"
+  # - "enmo_lag_24"
+  - "anglez_min_12"
+  - "enmo_min_12"
+  - "anglez_max_12"
+  - "enmo_max_12"
+  - "anglez_std_12"
+  - "enmo_std_12"
+  - "anglez_mean_12"
+  - "enmo_mean_12"
+  - "anglez_min_24"
+  - "enmo_min_24"
+  - "anglez_max_24"
+  - "enmo_max_24"
+  - "anglez_std_24"
+  - "enmo_std_24"
+  - "anglez_mean_24"
+  - "enmo_mean_24"
+  - "anglez_min_36"
+  - "enmo_min_36"
+  - "anglez_max_36"
+  - "enmo_max_36"
+  - "anglez_std_36"
+  - "enmo_std_36"
+  - "anglez_mean_36"
+  - "enmo_mean_36"
+  # - "anglez_min_48"
+  # - "enmo_min_48"
+  # - "anglez_max_48"
+  # - "enmo_max_48"
+  # - "anglez_std_48"
+  # - "enmo_std_48"
+  # - "anglez_mean_48"
+  # - "enmo_mean_48"
+  # - "anglez_min_60"
+  # - "enmo_min_60"
+  # - "anglez_max_60"
+  # - "enmo_max_60"
+  # - "anglez_std_60"
+  # - "enmo_std_60"
+  # - "anglez_mean_60"
+  # - "enmo_mean_60"
+
+# optimizer
+optimizer:
+  lr: 5e-4
+
+# scheduler
+scheduler:
+  num_warmup_steps: 0.2
+  
+# criterion
+loss:
+  name: "bce"
+  alpha: 1.0
+  gamma: 2.0
+  weight: 1
