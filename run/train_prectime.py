@@ -22,6 +22,7 @@ from time import gmtime, strftime
 import os
 import wandb
 import argparse
+from omegaconf import OmegaConf
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s:%(name)s - %(message)s"
@@ -116,9 +117,17 @@ def main(cfg: DictConfig):  # type: ignore
 
     torch.save(model.model.state_dict(), save_path)
     torch.save(cfg, cfg_save_path)
-    with open(cfg_yaml_save_path, 'w') as f:
-        yaml.dump(cfg, f)
+    
+    # yaml_str = yaml.dump(cfg, default_flow_style=False)        
+    # with open(cfg_yaml_save_path, "w") as file:
+    #     file.write(yaml_str)
+    
+    # 将DictConfig转换为OmegaConf格式
+    omega_conf = OmegaConf.create(cfg)
 
+    # 将OmegaConf保存为YAML文件
+    with open(cfg_yaml_save_path, 'w') as file:
+        yaml.dump(OmegaConf.to_container(omega_conf), file)
     wandb.finish()
     return
 
