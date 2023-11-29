@@ -10,4 +10,4 @@ mode: 'nearest'
 num_layers: 2
 n_heads: 8
 dropout: 0.5
-cnn_name: 'conv1d'
+cnn_name: 'cnn_transformer '
