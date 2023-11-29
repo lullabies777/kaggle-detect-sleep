@@ -75,7 +75,7 @@ def get_feature_extractor(
             out_size=num_timesteps,
         )
     elif cfg.feature_extractor.name == "PrecFeatureExtractor":
-        cfg.feature_extractor.left_hidden_channels = cfg.feature_extractor.right_hidden_channels
+        #cfg.feature_extractor.left_hidden_channels = cfg.feature_extractor.right_hidden_channels
         feature_extractor = PrecFeatureExtractor(
             input_channels=feature_dim,
             left_hidden_channels=cfg.feature_extractor.left_hidden_channels,
