@@ -16,7 +16,7 @@ defaults:
   - feature_extractor: PrecFeatureExtractor
   - decoder: PredictionRefinement
   - encoder: ContextDetection
-  - split: fold_1
+  - split: fold_0
 
 seed: 42
 exp_name: prectime
@@ -33,7 +33,7 @@ chunks: 480
 num_classes: 3
 
 # training
-epoch: 9
+epoch: 180
 batch_size: 32
 num_workers: 16
 accelerator: auto
