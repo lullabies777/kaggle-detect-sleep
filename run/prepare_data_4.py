@@ -1,31 +1,19 @@
 import sys
 sys.path.append('./')
-from tqdm import tqdm
-from omegaconf import DictConfig
-import polars as pl
-import numpy as np
-import hydra
-from pathlib import Path
-import shutil
 from src.utils.common import trace
+import shutil
+from pathlib import Path
+import hydra
+import numpy as np
+import polars as pl
+from omegaconf import DictConfig
+from tqdm import tqdm
 
-window_steps = [12, 24, 36, 48, 60]
-shift_start = 0
-shift_end = 0
-shift_step = 12
 diff_start = 0
 diff_end = 6
 diff_step = 1
 
 new_feature_names = []
-
-
-for i in range(shift_start, shift_end, shift_step):
-    if i != 0:
-        name_anglez = f"anglez_lag_{i}"
-        new_feature_names.append(name_anglez)
-        name_enmo = f"enmo_lag_{i}"
-        new_feature_names.append(name_enmo)
 
 for i in range(diff_start, diff_end, diff_step):
     if i != 0:
@@ -33,13 +21,6 @@ for i in range(diff_start, diff_end, diff_step):
         new_feature_names.append(name_anglez)
         name_enmo = f"enmo_diff_{i}"
         new_feature_names.append(name_enmo)
-
-for i in window_steps:
-    for metric in ["min", "max", "std", "mean"]:
-        new_anglez_feature = f"anglez_{metric}_{i}"
-        new_feature_names.append(new_anglez_feature)
-        new_enmo_feature = f"enmo_{metric}_{i}"
-        new_feature_names.append(new_enmo_feature)
 
 print(new_feature_names)
 # 'anglez_lag_-24', 'enmo_lag_-24', 'anglez_lag_-12', 'enmo_lag_-12', 'anglez_lag_12', 'enmo_lag_12', 'anglez_lag_24', 'enmo_lag_24', 'anglez_min_12', 'enmo_min_12', 'anglez_max_12', 'enmo_max_12', 'anglez_std_12', 'enmo_std_12', 'anglez_mean_12', 'enmo_mean_12', 'anglez_min_24', 'enmo_min_24', 'anglez_max_24', 'enmo_max_24', 'anglez_std_24', 'enmo_std_24', 'anglez_mean_24', 'enmo_mean_24', 'anglez_min_36', 'enmo_min_36', 'anglez_max_36', 'enmo_max_36', 'anglez_std_36', 'enmo_std_36', 'anglez_mean_36', 'enmo_mean_36', 'anglez_min_48', 'enmo_min_48', 'anglez_max_48', 'enmo_max_48', 'anglez_std_48', 'enmo_std_48', 'anglez_mean_48', 'enmo_mean_48', 'anglez_min_60', 'enmo_min_60', 'anglez_max_60', 'enmo_max_60', 'anglez_std_60', 'enmo_std_60', 'anglez_mean_60', 'enmo_mean_60'
@@ -110,10 +91,10 @@ def save_each_series(this_series_df: pl.DataFrame, columns: list[str], output_di
 def main(cfg: DictConfig):
     processed_dir: Path = Path(cfg.dir.processed_dir) / cfg.phase
 
-    # ディレクトリが存在する場合は削除
-    if processed_dir.exists():
-        shutil.rmtree(processed_dir)
-        print(f"Removed {cfg.phase} dir: {processed_dir}")
+    # # ディレクトリが存在する場合は削除
+    # if processed_dir.exists():
+    #     shutil.rmtree(processed_dir)
+    #     print(f"Removed {cfg.phase} dir: {processed_dir}")
 
     with trace("Load series"):
         # scan parquet
@@ -186,53 +167,6 @@ def main(cfg: DictConfig):
 
         print(series_lf.columns)
 
-        # 修改之后，添加shift和rolling features
-        # series_df = (
-        #     series_lf.with_columns(
-        #         pl.col("timestamp").str.to_datetime("%Y-%m-%dT%H:%M:%S%z"),
-        #         deg_to_rad(pl.col("anglez")).alias("anglez_rad"),
-        #         # (pl.col("anglez") - ANGLEZ_MEAN) / ANGLEZ_STD,
-        #         # (pl.col("enmo") - ENMO_MEAN) / ENMO_STD,
-
-        #         *[pl.col("anglez").shift(i).alias(f"anglez_lag_{i}") for i in range(shift_start, shift_end, shift_step)],
-        #         *[pl.col("enmo").shift(i).alias(f"enmo_lag_{i}") for i in range(shift_start, shift_end, shift_step)],
-
-        #         *[pl.col("anglez").rolling_mean(window_size).alias(
-        #             f"anglez_mean_{window_size}") for window_size in [12, 24, 36, 48, 60]],
-        #         *[pl.col("anglez").rolling_min(window_size).alias(
-        #             f"anglez_min_{window_size}") for window_size in [12, 24, 36, 48, 60]],
-        #         *[pl.col("anglez").rolling_max(window_size).alias(
-        #             f"anglez_max_{window_size}") for window_size in [12, 24, 36, 48, 60]],
-        #         *[pl.col("anglez").rolling_std(window_size).alias(
-        #             f"anglez_std_{window_size}") for window_size in [12, 24, 36, 48, 60]],
-        #         *[pl.col("enmo").rolling_mean(window_size).alias(
-        #             f"enmo_mean_{window_size}") for window_size in [12, 24, 36, 48, 60]],
-        #         *[pl.col("enmo").rolling_min(window_size).alias(
-        #             f"enmo_min_{window_size}") for window_size in [12, 24, 36, 48, 60]],
-        #         *[pl.col("enmo").rolling_max(window_size).alias(
-        #             f"enmo_max_{window_size}") for window_size in [12, 24, 36, 48, 60]],
-        #         *[pl.col("enmo").rolling_std(window_size).alias(
-        #             f"enmo_std_{window_size}") for window_size in [12, 24, 36, 48, 60]]
-        #     )
-        #     .select(
-        #         [
-        #             pl.col("series_id"),
-        #             pl.col("anglez"),
-        #             pl.col("enmo"),
-        #             pl.col("timestamp"),
-        #             pl.col("anglez_rad"),
-        #             *[pl.col(f"anglez_lag_{i}") for i in range(shift_start, shift_end, shift_step)],
-        #             *[pl.col(f"enmo_lag_{i}") for i in range(shift_start, shift_end, shift_step)],
-        #             *[pl.col(f"anglez_{stat}_{window_size}") for stat in
-        #               ["mean", "min", "max", "std"] for window_size in [12, 24, 36, 48, 60]],
-        #             *[pl.col(f"enmo_{stat}_{window_size}") for stat in
-        #               ["mean", "min", "max", "std"] for window_size in [12, 24, 36, 48, 60]]
-        #         ]
-        #     )
-        #     .collect(streaming=True)
-        #     .sort(by=["series_id", "timestamp"])
-        # )
-
         # 更新之后 rolling feature只存在于同一个series_id的内容之间
         series_df = (
             series_lf.with_columns(
@@ -247,37 +181,37 @@ def main(cfg: DictConfig):
                 pl.col("anglez_rad"),
                 *[pl.col("anglez").diff(i).alias(f"anglez_diff_{i}") for i in range(diff_start, diff_end, diff_step)],
                 *[pl.col("enmo").diff(i).alias(f"enmo_diff_{i}") for i in range(diff_start, diff_end, diff_step)],
-                *[pl.col("anglez").shift(i).alias(f"anglez_lag_{i}")
-                  for i in range(shift_start, shift_end, shift_step) if i != 0],
-                *[pl.col("enmo").shift(i).alias(f"enmo_lag_{i}")
-                  for i in range(shift_start, shift_end, shift_step) if i != 0],
-                *[pl.col("anglez").rolling_mean(window_size).alias(
-                    f"anglez_mean_{window_size}") for window_size in window_steps],
-                *[pl.col("anglez").rolling_min(window_size).alias(
-                    f"anglez_min_{window_size}") for window_size in window_steps],
-                *[pl.col("anglez").rolling_max(window_size).alias(
-                    f"anglez_max_{window_size}") for window_size in window_steps],
-                *[pl.col("anglez").rolling_std(window_size).alias(
-                    f"anglez_std_{window_size}") for window_size in window_steps],
-                *[pl.col("enmo").rolling_mean(window_size).alias(
-                    f"enmo_mean_{window_size}") for window_size in window_steps],
-                *[pl.col("enmo").rolling_min(window_size).alias(
-                    f"enmo_min_{window_size}") for window_size in window_steps],
-                *[pl.col("enmo").rolling_max(window_size).alias(
-                    f"enmo_max_{window_size}") for window_size in window_steps],
-                *[pl.col("enmo").rolling_std(window_size).alias(
-                    f"enmo_std_{window_size}") for window_size in window_steps],
+                # *[pl.col("anglez").shift(i).alias(f"anglez_lag_{i}")
+                #   for i in range(shift_start, shift_end, shift_step) if i != 0],
+                # *[pl.col("enmo").shift(i).alias(f"enmo_lag_{i}")
+                #   for i in range(shift_start, shift_end, shift_step) if i != 0],
+                # *[pl.col("anglez").rolling_mean(window_size).alias(
+                #     f"anglez_mean_{window_size}") for window_size in window_steps],
+                # *[pl.col("anglez").rolling_min(window_size).alias(
+                #     f"anglez_min_{window_size}") for window_size in window_steps],
+                # *[pl.col("anglez").rolling_max(window_size).alias(
+                #     f"anglez_max_{window_size}") for window_size in window_steps],
+                # *[pl.col("anglez").rolling_std(window_size).alias(
+                #     f"anglez_std_{window_size}") for window_size in window_steps],
+                # *[pl.col("enmo").rolling_mean(window_size).alias(
+                #     f"enmo_mean_{window_size}") for window_size in window_steps],
+                # *[pl.col("enmo").rolling_min(window_size).alias(
+                #     f"enmo_min_{window_size}") for window_size in window_steps],
+                # *[pl.col("enmo").rolling_max(window_size).alias(
+                #     f"enmo_max_{window_size}") for window_size in window_steps],
+                # *[pl.col("enmo").rolling_std(window_size).alias(
+                #     f"enmo_std_{window_size}") for window_size in window_steps],
             ])
             .explode([
                 "anglez", "enmo", "timestamp", "anglez_rad",
                 *[f"anglez_diff_{i}" for i in range(diff_start, diff_end, diff_step)],
                 *[f"enmo_diff_{i}" for i in range(diff_start, diff_end, diff_step)],
-                *[f"anglez_lag_{i}" for i in range(shift_start, shift_end, shift_step) if i != 0],
-                *[f"enmo_lag_{i}" for i in range(shift_start, shift_end, shift_step) if i != 0],
-                *[f"anglez_{stat}_{window_size}" for stat in
-                  ["mean", "min", "max", "std"] for window_size in window_steps],
-                *[f"enmo_{stat}_{window_size}" for stat in
-                  ["mean", "min", "max", "std"] for window_size in window_steps],
+                # *[f"anglez_lag_{i}" for i in range(shift_start, shift_end, shift_step) if i != 0],
+                # *[f"enmo_lag_{i}" for i in range(shift_start, shift_end, shift_step) if i != 0],
+                # *[f"anglez_{stat}_{window_size}" for stat in
+                #   ["mean", "min", "max", "std"] for window_size in window_steps],
+                # *[f"enmo_{stat}_{window_size}" for stat in
+                #   ["mean", "min", "max", "std"] for window_size in window_steps],
             ])
             .collect(streaming=True)
             .sort(by=["series_id", "timestamp"])
