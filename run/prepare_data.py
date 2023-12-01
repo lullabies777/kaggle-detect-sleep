@@ -9,12 +9,12 @@ from pathlib import Path
 import shutil
 from src.utils.common import trace
 
-window_steps = [12, 24, 36, 48, 60]
+window_steps = [12, 24, 36]
 shift_start = 0
 shift_end = 0
 shift_step = 12
 diff_start = 1
-diff_end = 6
+diff_end = 13
 diff_step = 1
 
 new_feature_names = []
