@@ -9,7 +9,7 @@ import polars as pl
 from omegaconf import DictConfig
 from tqdm import tqdm
 
-diff_start = 0
+diff_start = 1
 diff_end = 6
 diff_step = 1
 

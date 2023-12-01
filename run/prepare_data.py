@@ -13,7 +13,7 @@ window_steps = [12, 24, 36, 48, 60]
 shift_start = 0
 shift_end = 0
 shift_step = 12
-diff_start = 0
+diff_start = 1
 diff_end = 6
 diff_step = 1
 
