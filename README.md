@@ -1,8 +1,6 @@
 # 39th Detail Solution  [Child Mind Institute - Detect Sleep States](https://www.kaggle.com/competitions/child-mind-institute-detect-sleep-states)
 
-**Thanks to Kaggle for hosting this meaningful competition. Thanks to all the Kagglers for your discussions and shared perspectives. **
-
-**This was our first time participating in a formal tabular competition, and we've learned a lot from the experience.**
+Thanks to Kaggle for hosting this meaningful competition. Thanks to all the Kagglers for your discussions and shared perspectives. This was our first time participating in a formal tabular competition, and we've learned a lot from the experience.
 
 **Team Avengers will always continue the journey on Kaggle.**
 
